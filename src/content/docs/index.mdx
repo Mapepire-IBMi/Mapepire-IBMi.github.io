@@ -1,0 +1,32 @@
+---
+title: Welcome to wsdb
+description: Get started building your app with wsdb
+template: splash
+hero:
+  tagline: A brand new IBM i database driver, built with ease-of-use and performance in-mind.
+  image:
+    file: ../../assets/houston.webp
+  actions:
+    - text: Find out more
+      link: /reference/why
+      icon: right-arrow
+      variant: primary
+    - text: Pick your client language
+      link: https://starlight.astro.build
+      icon: information
+---
+
+{/* https://github.com/withastro/starlight/blob/main/packages/starlight/components/Icons.ts */}
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Next steps
+
+<CardGrid>
+	<Card title="Install the Daemon" icon="pencil">
+		We create a brand new, simple to manage, database server for IBM i. Run it once, and you're done. [See guide](/guides/example).
+	</Card>
+	<Card title="Install a client library" icon="add-document">
+		Whether you're working in .NET Core, Node.js, or Python, we have a library for you. [See guides](./guides/example.md).
+	</Card>
+</CardGrid>
