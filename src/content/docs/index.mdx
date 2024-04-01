@@ -5,14 +5,14 @@ template: splash
 hero:
   tagline: A brand new IBM i database driver, built with ease-of-use and performance in-mind.
   image:
-    file: ../../assets/houston.webp
+    file: ../../assets/wsdb.png
   actions:
     - text: Find out more
       link: /reference/why
       icon: right-arrow
       variant: primary
     - text: Pick your client language
-      link: https://starlight.astro.build
+      link: /guides/developer
       icon: information
 ---
 
@@ -24,9 +24,9 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 <CardGrid>
 	<Card title="Install the Daemon" icon="pencil">
-		We create a brand new, simple to manage, database server for IBM i. Run it once, and you're done. [See guide](/guides/example).
+		We created a brand new, simple to manage, database server for IBM i. Run it once, and you're done. [See guide](guides/sysadmin).
 	</Card>
 	<Card title="Install a client library" icon="add-document">
-		Whether you're working in .NET Core, Node.js, or Python, we have a library for you. [See guides](./guides/example.md).
+		Whether you're working in .NET Core, Node.js, or Python, we have a library for you. [See guides](guides/developer).
 	</Card>
 </CardGrid>
