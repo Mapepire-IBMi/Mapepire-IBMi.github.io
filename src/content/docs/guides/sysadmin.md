@@ -1,23 +1,23 @@
 ---
 title: For system admins
-description: Installing the wsdb Daemon
+description: Installing the Apron Daemon
 ---
 
-In order for apps to use Db2 for i with wsdb clients from their runtimes, the Daemon must be installed and started-up on each IBM i. This is a simple process and there are many ways to achieve it.
+In order for apps to use Db2 for i with Apron clients from their runtimes, the Daemon must be installed and started-up on each IBM i. This is a simple process and there are many ways to achieve it.
 
 ### Installation
 
 #### yum
 
 ```sh
-yum install wsdb-daemon
+yum install apron-daemon
 ```
 
 #### App Installer
 
 ```sh
 # jesse to fill this in
-app-inst wsdb-daemon
+app-inst apron-daemon
 ```
 
 #### From latest build
@@ -33,25 +33,25 @@ After installing the Daemon, you must start it up once. The good news, is once i
 #### Shell
 
 ```sh
-wsdb /
+apron /
 ```
 
 #### Service Commander
 
 ```sh
 # jesse pls
-sc start wsdb
+sc start apron
 ```
 
 #### Submit Job
 
 ```sh
-SBMJOB NAME(WSDB) CMD(QSH('/x/y/z/wsdb'))
+SBMJOB NAME(apron) CMD(QSH('/x/y/z/apron'))
 ```
 
 ### Configuration
 
-The following are the defaults for WSDB. It is not recommended to change them.
+The following are the defaults for Apron. It is not recommended to change them.
 
 * `port`: `8076`
 * `secure`: always on. It is up to the clients to ensure they're encrypted.
