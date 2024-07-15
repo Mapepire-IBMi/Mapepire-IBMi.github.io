@@ -1,6 +1,6 @@
 ---
 title: Node.js
-description: Using Apron with Node.js
+description: Using Mapepire with Node.js
 ---
 
 Using Db2 for IBM i with Node.js is easy. First, install the package:
@@ -50,7 +50,7 @@ await pool.init();
 
 ### Securing
 
-By default, Apron will always try to connect securely. A majority of the time, servers are using their own self-signed certificate and is not from a CA (certificate authority). There are two options with the Node.js client:
+By default, Mapepire will always try to connect securely. A majority of the time, servers are using their own self-signed certificate and is not from a CA (certificate authority). There are two options with the Node.js client:
 
 #### Allow all certificates
 
@@ -58,7 +58,7 @@ On the `DaemonServer` interface, the `ignoreUnauthorized` set to `true` will all
 
 #### Validate the self-signed certificate
 
-The Apron Node.js client ships with an API, `getCertificate`, where you can fetch the self-signed certificate from the server before connecting to the Apron daemon. This allows your code to validate it using your own validation implementation before using it.
+The Mapepire Node.js client ships with an API, `getCertificate`, where you can fetch the self-signed certificate from the server before connecting to the Mapepire daemon. This allows your code to validate it using your own validation implementation before using it.
 
 `getCertificate` returns [an object](https://nodejs.org/api/tls.html#certificate-object) with the `raw` property, which can in turn be passed in as `ca` as part of the `DaemonServer` interface.
 
