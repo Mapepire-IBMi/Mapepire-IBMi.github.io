@@ -6,7 +6,7 @@ description: Using Mapepire with Node.js
 Using Db2 for IBM i with Node.js is easy. First, install the package:
 
 ```sh
-npm i @ibm/wsdb-node
+npm i @ibm/mapepire-js
 ```
 
 ### Simple test
@@ -63,7 +63,7 @@ The Mapepire Node.js client ships with an API, `getCertificate`, where you can f
 `getCertificate` returns [an object](https://nodejs.org/api/tls.html#certificate-object) with the `raw` property, which can in turn be passed in as `ca` as part of the `DaemonServer` interface.
 
 ```ts
-import { getCertificate } from 'wsdb-node';
+import { getCertificate } from 'mapepire-js';
 
 async function validateTheCert(creds: DaemonServer) {
   const cert = await getCertificate(creds);
