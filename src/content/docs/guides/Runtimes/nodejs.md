@@ -17,11 +17,7 @@ This document illustrates the use of the mapepire-js client. Other language clie
 
 ### Specifying the mapepire-server instance for the connection
 
-The mapepire-server instance can run natively on the IBM i Db2 host, or can run on any suitable Node.js platform and connect remotely to an IBM i Db2 host.
-
-The location and port of the mapepire-server instance is specified in a `.env` file. Copy the `.env.sample` file in the root directory of mapepire-js to `.env` and fill in the values for the connection to the mapepire-server instance.
-
-The credentials used for the connection from the mapepire-server instance to the IBM i Db2 host are described below.
+The location and port of the mapepire-server instance as well as the credentials for IBM i Db2 can be specified in a `.env` file. Copy the `.env.sample` file in the root directory of mapepire-js to `.env` and fill in the values.
 
 #### SSH port redirection for connections through firewall to remote mapepire-server
 
