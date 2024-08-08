@@ -7,46 +7,53 @@ In order for apps to use Db2 for i with Mapepire clients from their runtimes, th
 
 ### Installation
 
-#### yum
+#### Option 1: RPM (recommended)
 
 ```sh
-yum install Mapepire-daemon
+yum install mapepire-server
 ```
 
-#### App Installer
+#### Option 2: manual installation
+
+1. Make a "download" directory on IBM i by running the following from an SSH terminal:
 
 ```sh
-# jesse to fill this in
-app-inst Mapepire-daemon
+mkdir -p /opt/download
 ```
 
-#### From latest build
+2. Download the distribution zip file (filename will look something like `mapepire-server-v___.zip`) from the [release page](https://github.com/Mapepire-IBMi/mapepire-server/releases/) and save it to the download directory you created. Rename the file to `mapepire-server-dist.zip`
 
+If you have `wget` installed and have internet access, you could use wget to download the file from IBM i, for instance (replace with proper version): 
+
+```sh
+cd /opt/download
+wget -O mapepire-server-dist.zip https://github.com/Mapepire-IBMi/mapepire-server/releases/download/v2.0.0-rc1/mapepire-server-2.0.0-rc1.zip
 ```
-wget github.com/x/y/z
+
+3. Unzip the file and reset ownership/permissions
+```sh
+cd /opt
+jar xvf /opt/download/mapepire-server-dist.zip
+chown -R qsys mapepire
 ```
+
 
 ### Startup
 
 After installing the Daemon, you must start it up once. The good news, is once it has started up, it can be just left running.
 
-#### Shell
+#### Service Commander (recommended)
+
+If you are running the RPM version of the mapepire server, you can install service commander (`yum install service-commander`) and ise it to start the mapepire service:
 
 ```sh
-Mapepire /
+sc start mapepire
 ```
 
-#### Service Commander
+#### Manual shell invocation
 
 ```sh
-# jesse pls
-sc start Mapepire
-```
-
-#### Submit Job
-
-```sh
-SBMJOB NAME(Mapepire) CMD(QSH('/x/y/z/Mapepire'))
+nohup /opt/mapepire/bin/mapepire &
 ```
 
 ### Configuration
