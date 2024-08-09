@@ -11,3 +11,13 @@ We provide clients for a few runtimes thus far, with more planned in the future.
 * [C#/.NET Core]() - *Mark Goff, IBM*
 * [PHP] - tbd
 * [Go] - tbh
+
+### App examples
+
+App examples that exist or will be built.
+
+#### TS/JS
+
+* Express and Mapepire
+* Fastify and Mapepire
+* Next.js CRUD
