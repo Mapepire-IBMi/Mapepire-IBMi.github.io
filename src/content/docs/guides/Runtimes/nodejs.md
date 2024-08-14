@@ -9,6 +9,20 @@ Using Db2 for IBM i with Node.js is easy. First, install the package:
 npm i @ibm/mapepire-js
 ```
 
+## Basic architecture
+
+mapepire-js is a pooling asynchronous client to an instance of the [mapepire-server](https://github.com/Mapepire-IBMi/mapepire-server). The mapepire-server authorizes and mediates connections to an IBM i Db2 server on behalf of the client.
+
+This document illustrates the use of the mapepire-js client. Other language clients and the mapepire-server itself are documented elsewhere.
+
+### Specifying the mapepire-server instance for the connection
+
+The location and port of the mapepire-server instance as well as the credentials for IBM i Db2 can be specified in a `.env` file. Copy the `.env.sample` file in the root directory of mapepire-js to `.env` and fill in the values. Note that any entry in the `.env` file containing javascript metacharacters such as `$` may need to be backslash-escaped , e.g.,
+
+```sh
+VITE_DB_PASS=MYPAS\$WORD
+```
+
 ### Simple test
 
 Credentials belong in an object which can be passed to a `Pool` or `SQLJob`.
