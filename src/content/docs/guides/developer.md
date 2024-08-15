@@ -14,7 +14,7 @@ We provide clients for a few runtimes thus far, with more planned in the future.
 
 # Mapepire Reference Archetecture
 
-This is a Python outline of the reference archetecture for `Mapepire` client libraries. The core components of the reference archetecture are the `SQLJob` and `Query` classes, which manage the execution of SQL queries and handle the communication with the database server. The classes are designed to be modular and reusable, allowing developers to build custom clients for different languages.
+This is an outline of the Python reference archetecture for `Mapepire`. The core components of the reference archetecture are the `SQLJob` and `Query` classes. The `SQLJob` class manages the WebSocket connection to the server and provides methods to create and run queries. The `Query` class manages the state of the query, sends it to the server, and fetches results.
 
 ## Core Functions
 
@@ -140,7 +140,7 @@ class SQLJob:
 
 **High-Level Overview**
 
-The `Query` class-like object is designed to manage and execute SQL queries, handle their states, and fetch additional data. It interacts with an `SQLJob` instance to send and receive data over a the WebSocket connection.
+The `Query` class-like object is designed to manage and execute SQL queries, handle their states, and fetch additional data. The `Query` object inherits an `SQLJob` instance and uses it's WebSocket connection to send and receive data. See the Query Class definition below.
 
 **Class Definitions and Functions**
 
