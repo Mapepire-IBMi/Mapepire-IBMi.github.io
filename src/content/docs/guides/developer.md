@@ -22,7 +22,7 @@ This is a Python outline of the reference archetecture for `Mapepire` client lib
 
 **High-Level Overview**
 
-The `SQLJob` "class-like" object is designed to manage and execute SQL queries. It handles the creation of unique identifiers for queries, manages WebSocket connections for sending and receiving data, and provides methods to run and fetch more data from queries. The class ensures that queries are executed in a controlled manner, maintaining their state and handling errors appropriately.
+The `SQLJob` "class-like" object is designed to manage the client connection to the `mapepire-server`. It handles the creation of unique identifiers for queries, manages WebSocket connections for sending and receiving data, and provides methods to create and run SQL queries. The class ensures that queries are executed in a controlled manner, maintaining their state and handling errors appropriately.
 
 **Class Definitions and Functions**
 
@@ -79,14 +79,14 @@ class SQLJob:
     ```
 - **Retuns**: (`WebSocket`) A WebSocket connection to the DB2 server.
 
-    This function is responsible for setting up a secure WebSocket connection to a database server. It constructs the connection URI, prepares the necessary headers for authentication, configures SSL options, and finally establishes the connection. The function returns the WebSocket object, which can then be used for communication with the server.
+    This function is responsible for setting up a secure WebSocket connection to the `mapepire-server`. It constructs the connection URI, prepares the necessary headers for authentication, configures SSL options, and finally establishes the connection. The function returns the WebSocket object, which can then be used for communication with the server.
 
 `send(self, content: Any)`
 - **Parmeters**: 
     - content (`Any`): Any object that can be serialized into a JSON string.
 - **Retuns**: None
     
-    This function is responsible for sending data to the server. It serializes the content into a JSON string, encodes it into bytes, and sends it over the WebSocket connection.
+    This function is responsible for sending data to the `mapepire-server` over a WebSocket connection.
 
 `connect(self, db2_server: DaemonServer) -> Dict[Any, Any]`
 - **Parmeters**: 
@@ -103,7 +103,7 @@ class SQLJob:
     ```
 - **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
-    This function is responsible for establishing a connection to the DB2 server. It calls the `_get_channel(db2_server)` function to create a WebSocket connection, sends the connection request to the server, and waits for a response. The function returns the response from the server, which contains information about the connection status.
+    This function is responsible for establishing a connection to the `mapepire-server`. It calls the `_get_channel(db2_server)` function to create a WebSocket connection, sends the connection request to the server, and waits for a response. The function returns the response from the server, which contains information about the connection status.
 
 `query(self, sql: str, opts: Optional[Union[Dict[str, Any], QueryOptions]] = None)`
 - **Parmeters**:    
@@ -140,7 +140,7 @@ class SQLJob:
 
 **High-Level Overview**
 
-The `Query` class-like object is designed to manage and execute SQL queries, handle their states, and fetch additional data if needed. It interacts with an `SQLJob` instance to send and receive data over a socket, ensuring that the query execution is properly managed and any errors are appropriately handled.
+The `Query` class-like object is designed to manage and execute SQL queries, handle their states, and fetch additional data. It interacts with an `SQLJob` instance to send and receive data over a the WebSocket connection.
 
 **Class Definitions and Functions**
 
