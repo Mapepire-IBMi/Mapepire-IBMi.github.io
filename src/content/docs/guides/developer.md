@@ -59,14 +59,14 @@ class SQLJob:
 
 `_get_unique_id(self, prefix: str = "id") -> str`
 - **Parmeters**:
-    - (`str`) A string containing the prefix for the unique identifier.
+    - prefix (`str`): A string containing the prefix for the unique identifier.
 - **Retuns**: (`str`) A unique identifier for a query.
 
     This function should update a counter for the number of queries executed and return a unique identifier for the query.
 
 `_get_channel(self, db2_server: DaemonServer) -> WebSocket`
 - **Parmeters**: 
-    - (`Dict[str, Any]`) A dictionary-like object containing the connection information for the DB2 server. Here is a sample definition of the `DaemonServer` class:
+    - db2_server (`Dict[str, Any]`): A dictionary-like object containing the connection information for the DB2 server. Here is a sample definition of the `DaemonServer` class:
     ```python
     @dataclass
     class DaemonServer:
@@ -83,14 +83,14 @@ class SQLJob:
 
 `send(self, content: Any)`
 - **Parmeters**: 
-    - (`Any`) Any object that can be serialized into a JSON string.
+    - content (`Any`): Any object that can be serialized into a JSON string.
 - **Retuns**: None
     
     This function is responsible for sending data to the server. It serializes the content into a JSON string, encodes it into bytes, and sends it over the WebSocket connection.
 
 `connect(self, db2_server: DaemonServer) -> Dict[Any, Any]`
 - **Parmeters**: 
-    - (`DaemonServer`) A dictionary-like object containing the connection information for the DB2 server. Here is a sample definition of the `DaemonServer` class:
+    - db2_server (`DaemonServer`): A dictionary-like object containing the connection information for the DB2 server. Here is a sample definition of the `DaemonServer` class:
     ```python
     @dataclass
     class DaemonServer:
@@ -103,12 +103,12 @@ class SQLJob:
     ```
 - **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
-    This function is responsible for establishing a connection to the DB2 server. It calls the `_get_channel(db2_server)` function to create a WebSocket connection, sends the connection request to the server, and waits for a response. The function returns the response from the server, which typically contains information about the connection status.
+    This function is responsible for establishing a connection to the DB2 server. It calls the `_get_channel(db2_server)` function to create a WebSocket connection, sends the connection request to the server, and waits for a response. The function returns the response from the server, which contains information about the connection status.
 
-`query(self, sql: str, Optional[Union[Dict[str, Any], QueryOptions]] = None)`
+`query(self, sql: str, opts: Optional[Union[Dict[str, Any], QueryOptions]] = None)`
 - **Parmeters**:    
-    - (`str`) A string containing the SQL query to be executed.
-    - (`Optional[Union[Dict[str, Any], QueryOptions]]`) A dictionary-like object containing additional options for the query. Here is a sample definition of the `QueryOptions` class:
+    - sql (`str`): A string containing the SQL query to be executed.
+    - opts (`Optional[Union[Dict[str, Any], QueryOptions]]`): A dictionary-like object containing additional options for the query. Here is a sample definition of the `QueryOptions` class:
     ```python
     @dataclass
     class QueryOptions:
@@ -121,10 +121,10 @@ class SQLJob:
 
     This function is responsible for creating a `Query` object that represents the SQL query to be executed. It constructs the query object with the provided SQL statement and any additional options. The function returns the `Query` object, which can then be used to run the query.
 
-`query_and_run(self, sql: str, Optional[Union[Dict[str, Any], QueryOptions]] = None)`
+`query_and_run(self, sql: str, opts: Optional[Union[Dict[str, Any], QueryOptions]] = None)`
 - **Parmeters**:
-    - (`str`) A string containing the SQL query to be executed.
-    - (`Optional[Union[Dict[str, Any], QueryOptions]]`) A dictionary-like object containing additional options for the query.
+    - sql (`str`): A string containing the SQL query to be executed.
+    - opts (`Optional[Union[Dict[str, Any], QueryOptions]]`): A dictionary-like object containing additional options for the query.
 
 - **Retuns**: (`Query`) A `Query` object representing the query to be executed.
 
@@ -188,14 +188,14 @@ class Query(Generic[T]):
 
 `run(self, rows_to_fetch: Optional[int] = None) -> Dict[str, Any]`
 - **Parmeters**:
-    - (`Optional[int]`) An integer specifying the number of rows to fetch from the query result.
+    - rows_to_fetch (`Optional[int]`): An integer specifying the number of rows to fetch from the query result.
 - **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
     This function is responsible for executing the query and fetching the initial set of results. It sends the query to the server, waits for a response, and returns the result. If `rows_to_fetch` is specified, the function fetches the specified number of rows from the result set.
 
 `fetch_more(self, rows_to_fetch: Optional[int] = None) -> Dict[str, Any]`
 - **Parmeters**:
-    - (`Optional[int]`) An integer specifying the number of rows to fetch from the query result.
+    - rows_to_fetch (`Optional[int]`): An integer specifying the number of rows to fetch from the query result.
 - **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
     This function is responsible for fetching additional rows from the query result. It sends a request to the server to fetch more rows, waits for a response, and returns the result.
