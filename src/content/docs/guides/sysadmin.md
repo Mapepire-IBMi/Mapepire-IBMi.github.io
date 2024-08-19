@@ -1,5 +1,5 @@
 ---
-title: For system admins
+title: Mapepire Server Installation
 description: Installing the Mapepire Daemon
 ---
 
