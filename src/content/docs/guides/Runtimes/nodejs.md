@@ -52,9 +52,9 @@ function testDb() {
 
 ### Pooling
 
-For typically production workloads, a connection pool should be used and created when in your apps startup process.
+For typical production workloads, a connection pool should be used and created when in your apps startup process.
 
-The pool has APIs so a free job can be accessed, or so you can just send a query to a free job.
+The pool provides APIs to access a free job or to send a query directly to a free job.
 
 ```ts
 const pool = new Pool({ creds, maxSize: 5, startingSize: 3 });
@@ -64,7 +64,7 @@ await pool.init();
 
 ### Securing
 
-By default, Mapepire will always try to connect securely. A majority of the time, servers are using their own self-signed certificate and is not from a CA (certificate authority). There are two options with the Node.js client:
+By default, Mapepire will always try to connect securely. A majority of the time, servers are using their own self-signed certificate that is not signed by a recognized CA (Certificate Authority). There are two options with the Node.js client:
 
 #### Allow all certificates
 
