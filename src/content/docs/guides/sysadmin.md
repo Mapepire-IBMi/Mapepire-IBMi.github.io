@@ -1,6 +1,8 @@
 ---
 title: Mapepire Server Installation
 description: Installing the Mapepire Daemon
+sidebar:
+    order: 1
 ---
 
 In order for apps to use Db2 for i with Mapepire clients from their runtimes, the Daemon must be installed and started-up on each IBM i. This is a simple process and there are many ways to achieve it.
