@@ -42,7 +42,19 @@ chown -R qsys .
 4. Start it up. There are more options below if you are not using Service Commander with manual installation.
 
 ```sh
+cd /opt/mapepire/lib/mapepire
+
+## Start
 sc start mapepire.yaml
+
+## Check it's running
+sc check mapepire.yaml
+
+## Check it's running
+sc stop mapepire.yaml
+
+## Check it's stopped
+sc check mapepire.yaml
 ```
 
 ### Startup
