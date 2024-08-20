@@ -27,14 +27,15 @@ If you have `wget` installed and have internet access, you could use wget to dow
 
 ```sh
 cd /opt/download
-wget -O mapepire-server-dist.zip https://github.com/Mapepire-IBMi/mapepire-server/releases/download/v2.0.3/mapepire-server-2.0.3.zip
+wget -O mapepire-server-dist.zip https://github.com/Mapepire-IBMi/mapepire-server/releases/download/v2.0.5/mapepire-server-2.0.5.zip
 ```
 
 3. Unzip the file and reset ownership/permissions
 ```sh
-cd /opt
+mkdir -p /opt/mapepire
+cd /opt/mapepire
 jar xvf /opt/download/mapepire-server-dist.zip
-chown -R qsys mapepire
+chown -R qsys .
 ```
 
 
@@ -42,7 +43,7 @@ chown -R qsys mapepire
 
 After installing the Daemon, you must start it up once. The good news, is once it has started up, it can be just left running.
 
-#### Service Commander (recommended)
+#### Service Commander (recommended, requires RPM-installed version)
 
 If you are running the RPM version of the mapepire server, you can install service commander (`yum install service-commander`) and ise it to start the mapepire service:
 
@@ -50,7 +51,14 @@ If you are running the RPM version of the mapepire server, you can install servi
 sc start mapepire
 ```
 
-#### Manual shell invocation
+#### Manual shell invocation (RPM-installed version)
+
+```sh
+nohup /QOpenSys/pkgs/bin/mapepire &
+```
+
+
+#### Manual shell invocation (manually-installed version)
 
 ```sh
 nohup /opt/mapepire/bin/mapepire &
