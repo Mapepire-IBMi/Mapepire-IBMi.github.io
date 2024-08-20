@@ -31,6 +31,7 @@ wget -O mapepire-server-dist.zip https://github.com/Mapepire-IBMi/mapepire-serve
 ```
 
 3. Unzip the file and reset ownership/permissions
+
 ```sh
 mkdir -p /opt/mapepire
 cd /opt/mapepire
@@ -38,6 +39,11 @@ jar xvf /opt/download/mapepire-server-dist.zip
 chown -R qsys .
 ```
 
+4. Start it up. There are more options below if you are not using Service Commander with manual installation.
+
+```sh
+sc start mapepire.yaml
+```
 
 ### Startup
 
