@@ -13,10 +13,12 @@ export default defineConfig({
 				{
 					label: 'Guides',
 					autogenerate: { directory: 'guides' },
+					badge: `start here`
 				},
 				{
 					label: 'Reference',
 					autogenerate: { directory: 'reference' },
+					collapsed: true,
 				},
 			],
 		}),
