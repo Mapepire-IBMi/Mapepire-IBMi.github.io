@@ -65,7 +65,7 @@ After installing the Daemon, you must start it up once. The good news, is once i
 
 #### Service Commander (recommended, requires RPM-installed version)
 
-If you are running the RPM version of the mapepire server, you can install service commander (`yum install service-commander`) and ise it to start the mapepire service:
+If you are running the RPM version of the mapepire server, you can install service commander (`yum install service-commander`) and use it to start the mapepire service:
 
 ```sh
 sc start mapepire
