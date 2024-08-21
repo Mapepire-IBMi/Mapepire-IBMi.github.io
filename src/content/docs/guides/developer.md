@@ -10,7 +10,7 @@ We provide clients for a few runtimes thus far, with more planned in the future.
 * [Python]() - *Adam Shedivy, IBM*
 * [Node.js](/guides/runtimes/nodejs) - *Jonathan Zak, IBM*
 * [Java]() - *Sanjula Ganepola, IBM*
-* [C#/.NET Core]() - *Mark Goff, IBM*
+* [C#/.NET Core] - *Mark Goff, IBM*
 * [PHP] - tbd
 * [Go] - tbh
 
