@@ -5,7 +5,6 @@ sidebar:
     order: 3
 ---
 
-
 # SSH port redirection for connections through firewall to remote mapepire-server
 
 When mapepire-js runs on a workstation and connects to mapepire-server running on a remote host that is firewalled, you can use Secure Shell (SSH) port redirection as a means to connect through the firewall.
