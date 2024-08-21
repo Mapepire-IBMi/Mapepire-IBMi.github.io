@@ -1,8 +1,9 @@
 ---
 title: SSH port redirection
 description: Insights on using SSH port redirection to work around connectivity issues
+sidebar:
+    order: 3
 ---
-
 
 # SSH port redirection for connections through firewall to remote mapepire-server
 
