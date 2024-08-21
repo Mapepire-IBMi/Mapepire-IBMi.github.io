@@ -1,5 +1,5 @@
 ---
-title: Mapepire clients
+title: Clients
 description: Installing a Mapepire client
 sidebar:
     order: 2

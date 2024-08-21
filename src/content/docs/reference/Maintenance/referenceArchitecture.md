@@ -1,5 +1,5 @@
 ---
-title: Mapepire Client Reference Architecture
+title: Client Reference Architecture
 description: Installing a Mapepire client
 sidebar:
     order: 0
@@ -49,14 +49,14 @@ class SQLJob:
 
 
 `_get_unique_id(self, prefix: str = "id") -> str`
-- **Parmeters**:
+- **Parameters**:
     - prefix (`str`): A string containing the prefix for the unique identifier.
-- **Retuns**: (`str`) A unique identifier for a query.
+- **Returns**: (`str`) A unique identifier for a query.
 
     This function should update a counter for the number of queries executed and return a unique identifier for the query.
 
 `_get_channel(self, db2_server: DaemonServer) -> WebSocket`
-- **Parmeters**: 
+- **Parameters**: 
     - db2_server (`Dict[str, Any]`): A dictionary-like object containing the connection information for the DB2 server. Here is a sample definition of the `DaemonServer` class:
     ```python
     @dataclass
@@ -68,19 +68,19 @@ class SQLJob:
         ignoreUnauthorized: Optional[bool] = None
         ca: Optional[Union[str, bytes]] = None
     ```
-- **Retuns**: (`WebSocket`) A WebSocket connection to the DB2 server.
+- **Returns**: (`WebSocket`) A WebSocket connection to the DB2 server.
 
     This function is responsible for setting up a secure WebSocket connection to the `mapepire-server`. It constructs the connection URI, prepares the necessary headers for authentication, configures SSL options, and finally establishes the connection. The function returns the WebSocket object, which can then be used for communication with the server.
 
 `send(self, content: Any)`
-- **Parmeters**: 
+- **Parameters**: 
     - content (`Any`): Any object that can be serialized into a JSON string.
-- **Retuns**: None
+- **Returns**: None
     
     This function is responsible for sending data to the `mapepire-server` over a WebSocket connection.
 
 `connect(self, db2_server: DaemonServer) -> Dict[Any, Any]`
-- **Parmeters**: 
+- **Parameters**: 
     - db2_server (`DaemonServer`): A dictionary-like object containing the connection information for the DB2 server. Here is a sample definition of the `DaemonServer` class:
     ```python
     @dataclass
@@ -92,12 +92,12 @@ class SQLJob:
         ignoreUnauthorized: Optional[bool] = None
         ca: Optional[Union[str, bytes]] = None
     ```
-- **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
+- **Returns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
     This function is responsible for establishing a connection to the `mapepire-server`. It calls the `_get_channel(db2_server)` function to create a WebSocket connection, sends the connection request to the server, and waits for a response. The function returns the response from the server, which contains information about the connection status.
 
 `query(self, sql: str, opts: Optional[Union[Dict[str, Any], QueryOptions]] = None)`
-- **Parmeters**:    
+- **Parameters**:    
     - sql (`str`): A string containing the SQL query to be executed.
     - opts (`Optional[Union[Dict[str, Any], QueryOptions]]`): A dictionary-like object containing additional options for the query. Here is a sample definition of the `QueryOptions` class:
     ```python
@@ -108,22 +108,22 @@ class SQLJob:
         parameters: Optional[List[str]] = None
         autoClose: Optional[bool] = None
     ```
-- **Retuns**: (`Query`) A `Query` object representing the query to be executed.
+- **Returns**: (`Query`) A `Query` object representing the query to be executed.
 
     This function is responsible for creating a `Query` object that represents the SQL query to be executed. It constructs the query object with the provided SQL statement and any additional options. The function returns the `Query` object, which can then be used to run the query.
 
 `query_and_run(self, sql: str, opts: Optional[Union[Dict[str, Any], QueryOptions]] = None)`
-- **Parmeters**:
+- **Parameters**:
     - sql (`str`): A string containing the SQL query to be executed.
     - opts (`Optional[Union[Dict[str, Any], QueryOptions]]`): A dictionary-like object containing additional options for the query.
 
-- **Retuns**: (`Query`) A `Query` object representing the query to be executed.
+- **Returns**: (`Query`) A `Query` object representing the query to be executed.
 
     This function is a convenience method that combines the `query` and `run` functions. It creates a `Query` object with the provided SQL statement and options, then immediately runs the query. The function returns the `Query` object, which can be used to fetch more data or close the query.
 
 `close(self)`
-- **Parmeters**: None
-- **Retuns**: None
+- **Parameters**: None
+- **Returns**: None
 
     This function is responsible for closing the WebSocket connection to the DB2 server. It sends a close request to the server and waits for a response. Once the connection is closed, the function cleans up any resources associated with the connection.
 
@@ -178,16 +178,16 @@ class Query(Generic[T]):
 ```
 
 `run(self, rows_to_fetch: Optional[int] = None) -> Dict[str, Any]`
-- **Parmeters**:
+- **Parameters**:
     - rows_to_fetch (`Optional[int]`): An integer specifying the number of rows to fetch from the query result.
-- **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
+- **Returns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
     This function is responsible for executing the query and fetching the initial set of results. It sends the query to the server, waits for a response, and returns the result. If `rows_to_fetch` is specified, the function fetches the specified number of rows from the result set.
 
 `fetch_more(self, rows_to_fetch: Optional[int] = None) -> Dict[str, Any]`
-- **Parmeters**:
+- **Parameters**:
     - rows_to_fetch (`Optional[int]`): An integer specifying the number of rows to fetch from the query result.
-- **Retuns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
+- **Returns**: (`Dict[str, Any]`) A dictionary-like object containing the response from the server.
 
     This function is responsible for fetching additional rows from the query result. It sends a request to the server to fetch more rows, waits for a response, and returns the result.
 

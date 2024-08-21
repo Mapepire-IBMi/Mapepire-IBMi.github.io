@@ -1,5 +1,5 @@
 ---
-title: Mapepire Server Installation
+title: Server Installation
 description: Installing the Mapepire Daemon
 sidebar:
     order: 1
