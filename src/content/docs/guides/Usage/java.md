@@ -146,7 +146,7 @@ By default, Mapepire will always try to connect securely. A majority of the time
 
 On the `DaemonServer` object, the `ignoreUnauthorized` option can be set to `true` which will allow either self-signed certificates or certificates from a CA.
 
-#### Validate the Self-signed Certificate
+#### Validate Self-signed Certificates
 
 :::caution
 Validation of self-signed certificates is currently not supported. You can track the progress of this issue [here](https://github.com/Mapepire-IBMi/mapepire-java/issues/49).
