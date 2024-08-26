@@ -19,7 +19,7 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 
 * Java 8 or later
 
-### Specifying the `mapepire-server` Instance for the Connection
+## Specifying the `mapepire-server` Instance for the Connection
 
 The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/java/simple-app/src/main/resources/config.properties.sample) file from the [simple-app](https://github.com/Mapepire-IBMi/java/simple-app) demo project to `config.properties` and fill in the credentials.
 
@@ -46,7 +46,7 @@ private static DaemonServer getDaemonServer() throws IOException {
 }
 ```
 
-### Running Queries
+## Running Queries
 
 The core APIs lie in the `SqlJob` and `Query` classes which are what give you the ability to execute queries.
 
@@ -65,7 +65,7 @@ query.close().get();
 job.close();
 ```
 
-#### Prepared Statements 
+### Prepared Statements 
 
 Statements can be easily prepared and executed with parameters:
 
@@ -75,7 +75,7 @@ Query<Object> query = job.query("SELECT * FROM SAMPLE.SYSCOLUMNS WHERE COLUMN_NA
 QueryResult<Object> result = query.execute(30).get();
 ```
 
-#### CL Commands
+### CL Commands
 
 CL commands can be easily run by setting the `isClCommand` option to be `true` on the `QueryOptions` object or by directly using the `clCommand` API on a job:
 
@@ -84,7 +84,7 @@ Query<Object> query = job.clCommand("CRTLIB LIB(MYLIB1) TEXT('My cool library')"
 QueryResult<Object> result = query.execute().get();
 ```
 
-#### Paginating Results
+### Paginating Results
 
 Paginating results can be easily achieved using the `rowsToFetch` parameter when executing a query along with the `fetchMore` API to retrieve more results.
 
@@ -99,7 +99,7 @@ while (!result.getIsDone()) {
 }
 ```
 
-### Pooling
+## Pooling
 
 To streamline the creation and reuse of `SqlJob` objects, your application should establish a connection pool on startup. This is recommended as connection pools significantly improve performance as it reduces the number of connection objects that are created.
 
@@ -112,7 +112,7 @@ Pool pool = new Pool(poolOptions);
 pool.init().get();
 ```
 
-### JDBC Options
+## JDBC Options
 
 When creating an `SqlJob` or `Pool` object, JDBC options can be specified. For a full list of all options, check out the documentation [here](https://www.ibm.com/docs/en/i/7.4?topic=jdbc-toolbox-java-properties).
 
@@ -130,7 +130,7 @@ PoolOptions poolOptions = new PoolOptions(creds, jdbcOptions, 5, 3);
 Pool pool = new Pool(poolOptions);
 ```
 
-### Exception Handling
+## Exception Handling
 
 The APIs provided by the client SDK can throw various checked exceptions which should be caught and handled. In particular, the following exceptions communicate important error information from either the `mapepire-server` component or the client SDK itself:
 
@@ -138,15 +138,15 @@ The APIs provided by the client SDK can throw various checked exceptions which s
 * `UnknownServerException` - This is throw when the server hits an unknown exception.
 * `ClientException` - This is thrown when the client SDK wants to communicate an error with calling an API.
 
-### Secure Connections
+## Secure Connections
 
 By default, Mapepire will always try to connect securely. A majority of the time, servers are using their own self-signed certificate that is not signed by a recognized CA (Certificate Authority). There are two options with the Java client.
 
-#### Allow All Certificates
+### Allow All Certificates
 
 On the `DaemonServer` object, the `ignoreUnauthorized` option can be set to `true` which will allow either self-signed certificates or certificates from a CA.
 
-#### Validate Self-signed Certificates
+### Validate Self-signed Certificates
 
 :::caution
 Validation of self-signed certificates is currently not supported. You can track the progress of this issue [here](https://github.com/Mapepire-IBMi/mapepire-java/issues/49).
