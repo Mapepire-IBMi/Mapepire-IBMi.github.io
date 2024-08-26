@@ -21,7 +21,7 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 
 ### Specifying the `mapepire-server` Instance for the Connection
 
-The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/java/simple-app/src/main/resources/config.properties.sample) file from the `simple-app` demo project to `config.properties` and fill in the credentials.
+The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/java/simple-app/src/main/resources/config.properties.sample) file from the [simple-app](https://github.com/Mapepire-IBMi/java/simple-app) demo project to `config.properties` and fill in the credentials.
 
 The following function can be used to construct a `DaemonServer` object with the credentials you just specified. This object will be passed to a `SqlJob` or `Pool` object.
 
