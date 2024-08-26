@@ -8,11 +8,11 @@ sidebar:
 We provide clients for a few runtimes thus far, with more planned in the future. Select your runtime/language below for a guide to get started with it.
 
 * [Python]() - *Adam Shedivy, IBM*
-* [Node.js](/guides/Clients/nodejs) - *Jonathan Zak, IBM*
-* [Java]() - *Sanjula Ganepola, IBM*
+* [Node.js](/guides/usage/nodejs) - *Jonathan Zak, IBM*
+* [Java](/guides/usage/java) - *Sanjula Ganepola, IBM*
 * [C#/.NET Core] - *Mark Goff, IBM*
-* [PHP] - tbd
-* [Go] - tbh
+* [PHP] - TBD
+* [Go] - TBD
 
 
 ### App examples
