@@ -65,9 +65,9 @@ query.close().get();
 job.close();
 ```
 
-#### SQL Prepared Statements 
+#### Prepared Statements 
 
-SQL statements can be easily prepared and executed with parameters:
+Statements can be easily prepared and executed with parameters:
 
 ```java
 QueryOptions options = new QueryOptions(false, false, Arrays.asList("TABLE_NAME", "LONG_COMMENT", "CONSTRAINT_NAME"));

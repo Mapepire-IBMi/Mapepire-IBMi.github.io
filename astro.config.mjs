@@ -21,6 +21,9 @@ export default defineConfig({
 					collapsed: true,
 				},
 			],
+			tableOfContents: {
+				maxHeadingLevel: 4
+			}
 		}),
 	],
 });
