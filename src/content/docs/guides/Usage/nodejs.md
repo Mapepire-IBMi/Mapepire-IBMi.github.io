@@ -1,6 +1,8 @@
 ---
 title: Node.js
 description: Using Mapepire with Node.js
+sidebar:
+    order: 2
 ---
 
 Using Db2 for IBM i with Node.js is easy. First, install the package:
