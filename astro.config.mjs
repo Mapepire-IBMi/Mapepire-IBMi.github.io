@@ -7,7 +7,7 @@ export default defineConfig({
 		starlight({
 			title: 'Mapepire',
 			social: {
-				github: 'https://github.com/withastro/starlight',
+				github: 'https://github.com/Mapepire-IBMi',
 			},
 			sidebar: [
 				{
