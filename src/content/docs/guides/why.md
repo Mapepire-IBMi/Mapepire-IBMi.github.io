@@ -5,8 +5,6 @@ sidebar:
     order: 0
 ---
 
-# Why Mapepire?
-
 Mapepire (pronounced 'mapəpɪə' or 'MAH-pup-ee') is a database access layer written on top of secure web sockets. It was built to make developing modern applications in .NET Core, Node.js, PHP, and the likes, easier when using Db2 for i.
 
 The core tenets of Mapepire's design include:
