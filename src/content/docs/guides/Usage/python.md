@@ -27,7 +27,7 @@ The following script sets up a `DaemonServer` object that will be used to connec
 ```python
 import configparser
 from mapepire_python.client.sql_job import SQLJob
-from mapepire_python.types import DaemonServer
+from mapepire_python.data_types import DaemonServer
 
 config = configparser.ConfigParser()
 config.read('mapepire.ini')
@@ -182,7 +182,7 @@ To create and run a query in a single step, use the `query_and_run` method:
 ```python
 import configparser
 from mapepire_python.client.sql_job import SQLJob
-from mapepire_python.types import DaemonServer
+from mapepire_python.data_types import DaemonServer
 
 config = configparser.ConfigParser()
 config.read('mapepire.ini')
