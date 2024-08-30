@@ -13,7 +13,7 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 <dependency>
     <groupId>io.github.mapepire-ibmi</groupId>
     <artifactId>mapepire-sdk</artifactId>
-    <version>0.0.3</version>  <!-- Use the latest version -->
+    <version>0.0.5</version>  <!-- Use the latest version -->
 </dependency>
 ```
 
@@ -59,8 +59,8 @@ SqlJob job = new SqlJob();
 job.connect(creds).get();
 
 // Initialize and execute query
-Query<Object> query = job.query("SELECT * FROM SAMPLE.DEPARTMENT");
-QueryResult<Object> result = query.execute(3).get();
+Query query = job.query("SELECT * FROM SAMPLE.DEPARTMENT");
+QueryResult<Object> result = query.execute().get();
 
 // Close query and job
 query.close().get();
@@ -72,9 +72,9 @@ job.close();
 Statements can be easily prepared and executed with parameters:
 
 ```java
-QueryOptions options = new QueryOptions(false, false, Arrays.asList("TABLE_NAME", "LONG_COMMENT", "CONSTRAINT_NAME"));
-Query<Object> query = job.query("SELECT * FROM SAMPLE.SYSCOLUMNS WHERE COLUMN_NAME IN (?, ?, ?)", options);
-QueryResult<Object> result = query.execute(30).get();
+QueryOptions options = new QueryOptions(false, false, Arrays.asList("A00"));
+Query query = job.query("SELECT * FROM SAMPLE.DEPARTMENT WHERE ADMRDEPT = ?", options);
+QueryResult<Object> result = query.execute().get();
 ```
 
 ### CL Commands
@@ -82,7 +82,7 @@ QueryResult<Object> result = query.execute(30).get();
 CL commands can be easily run by setting the `isClCommand` option to be `true` on the `QueryOptions` object or by directly using the `clCommand` API on a job:
 
 ```java
-Query<Object> query = job.clCommand("CRTLIB LIB(MYLIB1) TEXT('My cool library')");
+Query query = job.clCommand("CRTLIB LIB(MYLIB1) TEXT('My cool library')");
 QueryResult<Object> result = query.execute().get();
 ```
 
@@ -92,10 +92,10 @@ Paginating results can be easily achieved using the `rowsToFetch` parameter when
 
 ```java
 // Execute query and fetch 10 rows
-Query<Object> query = job.query("SELECT * FROM SAMPLE.DEPARTMENT");
+Query query = job.query("SELECT * FROM SAMPLE.EMPLOYEE");
 QueryResult<Object> result = query.execute(10).get();
 
-// Continuously fetch 50 more rows until all all rows have been returned
+// Continuously fetch 10 more rows until all all rows have been returned
 while (!result.getIsDone()) {
     result = query.fetchMore(50).get();
 }
@@ -109,9 +109,18 @@ A pool can be initialized with a given starting size and maximum size. Once init
 
 ```java
 // Create a pool with a max size of 5 and starting size of 3
+DaemonServer creds = getDaemonServer();
 PoolOptions poolOptions = new PoolOptions(creds, 5, 3);
 Pool pool = new Pool(poolOptions);
 pool.init().get();
+
+// Initialize and execute query
+Query query = pool.query("SELECT * FROM SAMPLE.DEPARTMENT");
+QueryResult<Object> result = query.execute().get();
+
+// Close query and job
+query.close().get();
+pool.end();
 ```
 
 ## JDBC Options
