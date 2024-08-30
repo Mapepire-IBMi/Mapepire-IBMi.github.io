@@ -1,4 +1,3 @@
-
 ---
 title: Python
 description: Using Mapepire with Python
