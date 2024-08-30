@@ -7,20 +7,17 @@ sidebar:
 
 We provide clients for a few runtimes thus far, with more planned in the future. Select your runtime/language below for a guide to get started with it.
 
-* [Python]() - *Adam Shedivy, IBM*
-* [Node.js](/guides/usage/nodejs) - *Jonathan Zak, IBM*
-* [Java](/guides/usage/java) - *Sanjula Ganepola, IBM*
-* [C#/.NET Core] - *Mark Goff, IBM*
-* [PHP] - TBD
-* [Go] - TBD
+Available:
+* [Python](/guides/usage/python)
+* [Node.js](/guides/usage/nodejs)
+* [Java](/guides/usage/java)
+
+Future SDKs:
+* C#/.NET Core
+* PHP
+* Go
 
 
 ### App examples
 
-App examples that exist or will be built.
-
-#### TS/JS
-
-* Express and Mapepire
-* Fastify and Mapepire
-* Next.js CRUD
+The [samples repository](https://github.com/Mapepire-IBMi/samples) contains a number of sample client applications using Mapepire!

@@ -5,6 +5,8 @@ sidebar:
     order: 3
 ---
 
+Full API docs can be found on the [client SDK project page](https://github.com/Mapepire-IBMi/mapepire-java), but the basics are summarized here. 
+
 Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` client SDK. To get started, install the package with `maven`. Make sure to install the latest version from [Maven Central](https://central.sonatype.com/artifact/io.github.mapepire-ibmi/mapepire-sdk).
 
 ```xml
