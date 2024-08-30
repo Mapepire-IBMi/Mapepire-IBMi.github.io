@@ -33,7 +33,7 @@ If you have `wget` installed and have internet access, you could use wget to dow
 
 ```sh
 cd /opt/download
-wget -O mapepire-server-dist.zip https://github.com/Mapepire-IBMi/mapepire-server/releases/download/v2.0.5/mapepire-server-2.0.5.zip
+wget -O mapepire-server-dist.zip https://github.com/Mapepire-IBMi/mapepire-server/releases/latest/download/mapepire-server-dist.zip
 ```
 
 3. Unzip the file and reset ownership/permissions
