@@ -7,6 +7,8 @@ sidebar:
 
 Mapepire (pronounced 'mapəpɪə' or 'MAH-pup-ee') is a database access layer written on top of secure web sockets. It was built to make developing modern applications in .NET Core, Node.js, PHP, and the likes, easier when using Db2 for i.
 
+🎉🎉 **As of August 30, 2024, Mapepire is now available as a Technology Preview!** 🎉🎉
+
 The core tenets of Mapepire's design include:
 - A consistent client SDK across languages
 - Minimal dependencies
