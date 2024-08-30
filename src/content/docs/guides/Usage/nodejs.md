@@ -5,6 +5,9 @@ sidebar:
     order: 2
 ---
 
+Full API docs can be found on the [client SDK project page](https://github.com/Mapepire-IBMi/mapepire-js), but the basics are summarized here. 
+
+
 Using Db2 for IBM i with Node.js is easy. First, install the package:
 
 ```sh
