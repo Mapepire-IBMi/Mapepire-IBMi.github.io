@@ -118,7 +118,7 @@ pool.init().get();
 Query query = pool.query("SELECT * FROM SAMPLE.DEPARTMENT");
 QueryResult<Object> result = query.execute().get();
 
-// Close query and job
+// Close query and pool
 query.close().get();
 pool.end();
 ```
