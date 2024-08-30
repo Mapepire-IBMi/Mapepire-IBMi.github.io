@@ -6,6 +6,8 @@ sidebar:
     order: 4
 ---
 
+Full API docs can be found on the [client SDK project page](https://github.com/Mapepire-IBMi/mapepire-python), but the basics are summarized here. 
+
 Using Db2 for IBM i with Python is easy. First, install the package:
 
 ```sh
