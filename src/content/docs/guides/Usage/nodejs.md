@@ -29,22 +29,25 @@ const creds: DaemonServer = {
   host: process.env.DB2_HOST,
   user: process.env.DB2_USER,
   password: process.env.DB2_PASS,
+  ignoreUnauthorized: true //Only if Mapepire runs with a self-signed certificate
 }
 ```
 
-Create a function to test the database connection:
+Create a function to test the database connection and run it:
 
 ```ts
-function testDb() {
+async function listObjects(library: string) {
   const job = new SQLJob();
-
   await job.connect(creds);
 
-  const query = job.query<any[]>(`values job_name`);
-  const result = await query.run();
+  const query = job.query<{ OBJNAME: string, OBJTYPE: string }>(`select OBJNAME, OBJTYPE from table (QSYS2.OBJECT_STATISTICS('${library}','*ALL','*ALLSIMPLE'))`);
+  const result = await query.execute();
+  result.data.forEach(row => console.log(`${row.OBJNAME} (${row.OBJTYPE})`));
 
-  job.close();
+  await job.close();
 }
+
+listObjects('QGPL');
 ```
 
 ### Pooling
