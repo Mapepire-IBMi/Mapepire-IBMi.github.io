@@ -56,7 +56,7 @@ sc start mapepire.yaml
 ## Check it's running
 sc check mapepire.yaml
 
-## Check it's running
+## Stop
 sc stop mapepire.yaml
 
 ## Check it's stopped
