@@ -92,7 +92,7 @@ nohup /opt/mapepire/bin/mapepire &
 
 ### Server Name
 
-Make sure any name reference to the server (as opposed to a dotted IP address), such as the `DB_SERVER` variable in your `.env` file, points to a name that can be found on the IBM is via DNS. You may have to create a host table entry (see the IBM i command `CFGTCP` and its `Option 10 Work with TCP/IP host table entries`)
+Make sure any name reference to the server (as opposed to a dotted IP address) points to a name that can be found on the IBM is via DNS. You may have to create a host table entry (see the IBM i command `CFGTCP` and its `Option 10 Work with TCP/IP host table entries`)
 
 ### Port configuration
 
