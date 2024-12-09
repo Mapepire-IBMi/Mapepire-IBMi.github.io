@@ -13,7 +13,7 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 <dependency>
     <groupId>io.github.mapepire-ibmi</groupId>
     <artifactId>mapepire-sdk</artifactId>
-    <version>0.0.5</version>  <!-- Use the latest version -->
+    <version>0.1.0</version>  <!-- Use the latest version -->
 </dependency>
 ```
 
@@ -23,9 +23,13 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 
 ## Specifying the `mapepire-server` Instance for the Connection
 
-The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/java/simple-app/src/main/resources/config.properties.sample) file from the [simple-app](https://github.com/Mapepire-IBMi/java/simple-app) demo project to `config.properties` and fill in the credentials.
+The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/samples/blob/main/java/simple-app/src/main/resources/config.properties.sample) file from the [simple-app](https://github.com/Mapepire-IBMi/samples/tree/main/java/simple-app) demo project to `config.properties` and fill in the credentials.
 
 The following function can be used to construct a `DaemonServer` object with the credentials you just specified. This object will be passed to a `SqlJob` or `Pool` object.
+
+:::note
+Refer to the [Secure Connections](#secure-connections) section to learn how this function should be updated based on your server certificate configuration.
+:::
 
 ```java
 private static DaemonServer getDaemonServer() throws IOException {
@@ -44,7 +48,7 @@ private static DaemonServer getDaemonServer() throws IOException {
     String password = properties.getProperty("IBMI_PASSWORD");
     int port = Integer.parseInt(properties.getProperty("IBMI_PORT"));
 
-    return new DaemonServer(host, port, user, password, true, "");
+    return new DaemonServer(host, port, user, password, false, "");
 }
 ```
 
@@ -151,14 +155,37 @@ The APIs provided by the client SDK can throw various checked exceptions which s
 
 ## Secure Connections
 
-By default, Mapepire will always try to connect securely. A majority of the time, servers are using their own self-signed certificate that is not signed by a recognized CA (Certificate Authority). There are two options with the Java client.
+By default, Mapepire will always try to connect securely. With the Java client, there are three options for connecting based on your server certificate configuration.
 
 ### Allow All Certificates
 
-On the `DaemonServer` object, the `ignoreUnauthorized` option can be set to `true` which will allow either self-signed certificates or certificates from a CA.
+In the case you would like to allow all certificates and skip any form of certificate validation, the `rejectUnauthorized` option can be set to `false` on the `DaemonServer` object.
 
-### Validate Self-signed Certificates
+```java
+DaemonServer creds = new DaemonServer("HOST", 8076, "USER", "PASSWORD", false);
+```
 
-:::caution
-Validation of self-signed certificates is currently not supported. You can track the progress of this issue [here](https://github.com/Mapepire-IBMi/mapepire-java/issues/49).
-:::
+### Validate Self-Signed Certificates
+
+In the case you have configured your server to use a self-signed certificate, you can use the `getCertificate` API provided by the Java client to fetch this certificate. The returned value should be passed as the `ca` to the `DaemonServer` object before connecting.
+
+```java
+DaemonServer creds = new DaemonServer("HOST", 8076, "USER", "PASSWORD");
+String ca = Tls.getCertificate(creds).get();
+creds.setCa(ca);
+```
+
+### Validate Certificate Signed by a Recognized CA
+
+In the case your server certificate is signed by a recognized CA, the `DaemonServer` object can be constructed without any additional parameters. Certificate validation will still take place using the Java trust store.
+
+```java
+DaemonServer creds = new DaemonServer("HOST", 8076, "USER", "PASSWORD");
+```
+
+## Sample Projects
+
+The following [Java specific sample projects](https://github.com/Mapepire-IBMi/samples/tree/main/java) can be used as a starting point to get started:
+
+* [simple-app](https://github.com/Mapepire-IBMi/samples/tree/main/java/simple-app): Simple demo application of using the Mapepire Java client SDK
+* [company-web-server](https://github.com/Mapepire-IBMi/samples/tree/main/java/company-web-server): Jetty company web server to manage departments, employees, and sales
