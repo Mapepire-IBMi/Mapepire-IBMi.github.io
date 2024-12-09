@@ -185,7 +185,7 @@ DaemonServer creds = new DaemonServer("HOST", 8076, "USER", "PASSWORD");
 
 ## Sample Projects
 
-The following [Java specific sample projects](https://github.com/Mapepire-IBMi/samples/tree/main/java) can be used as a starting point to get started:
+The following [Java Sample Projects](https://github.com/Mapepire-IBMi/samples/tree/main/java) showcase how the Java client SDK can be used in various applications. They are also a great starting point for building your own applications!
 
 * [simple-app](https://github.com/Mapepire-IBMi/samples/tree/main/java/simple-app): Simple demo application of using the Mapepire Java client SDK
 * [company-web-server](https://github.com/Mapepire-IBMi/samples/tree/main/java/company-web-server): Jetty company web server to manage departments, employees, and sales
