@@ -14,13 +14,17 @@ Using Db2 for IBM i with Node.js is easy. First, install the package:
 npm i @ibm/mapepire-js
 ```
 
+#### Sample Application
+
+See our sample Node.js applications in the [mapepire-samples](https://github.com/Mapepire-IBMi/samples/tree/main/typescript) repository.
+
 ## Basic architecture
 
 mapepire-js is a pooling asynchronous client to an instance of the [mapepire-server](https://github.com/Mapepire-IBMi/mapepire-server). The mapepire-server authorizes and mediates connections to an IBM i Db2 server on behalf of the client.
 
 This document illustrates the use of the mapepire-js client. Other language clients and the mapepire-server itself are documented elsewhere.
 
-### Simple test
+### Making a connection
 
 Credentials belong in an object which can be passed to a `Pool` or `SQLJob`.
 
@@ -50,6 +54,53 @@ async function listObjects(library: string) {
 listObjects('QGPL');
 ```
 
+### Parameters
+
+Parameters can be passed to queries when they are being executed.
+
+```ts
+const query = job.query<any[]>(`select * from table where col = ?`, {parameters: [`value`]});
+```
+
+And it is also possible to pass in batches of parameters:
+
+```ts
+const query = job.query<any[]>(
+  "update SAMPLE.DELETEME set phone = ? where name = ?",
+  {
+    parameters: [
+      ["789-678-6543", "SANJULA"],
+      ["222-456-1234", "TONGKUN"],
+      ["123-456-7891", "JAMES"],
+    ],
+  }
+);
+```
+
+### Paging
+
+Paging can be used to block fetch rows in chunks.
+
+```ts
+const query = await job.query<any>("select * FROM SAMPLE.SYSCOLUMNS");
+let res = await query.execute();
+while (!res.is_done) {
+  res = await query.fetchMore(300);
+  console.table(res.data);
+}
+await query.close();
+await job.close();
+```
+
+### CL commands
+
+CL commands can be executed through an SQLJob.
+
+```ts
+const query = await job.clcommand("INVALIDCOMMAND");
+const res = await query.execute();
+```
+
 ### Pooling
 
 For typical production workloads, a connection pool should be used and created when in your apps startup process.
@@ -60,6 +111,19 @@ The pool provides APIs to access a free job or to send a query directly to a fre
 const pool = new Pool({ creds, maxSize: 5, startingSize: 3 });
 
 await pool.init();
+```
+
+#### Execute in a pool
+
+`pool.execute` will automatically find a free job and execute the query. If there are no free jobs, it will find the least busy job and wait for it to become free.
+
+```ts
+const pool = new Pool({ creds, maxSize: 5, startingSize: 3 });
+
+await pool.init();
+
+const result = await pool.execute(`values current user`);
+console.log(result);
 ```
 
 ### Securing

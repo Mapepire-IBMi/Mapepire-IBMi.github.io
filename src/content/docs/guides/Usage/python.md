@@ -5,16 +5,134 @@ sidebar:
     order: 4
 ---
 
-Full API docs can be found on the [client SDK project page](https://github.com/Mapepire-IBMi/mapepire-python), but the basics are summarized here. 
+Find the source code for the python client: [client SDK project page](https://github.com/Mapepire-IBMi/mapepire-python).
 
-Using Db2 for IBM i with Python is easy. First, install the package:
+`mapepire-python` is a Python client implementation for [Mapepire](https://github.com/Mapepire-IBMi) that provides a simple interface for connecting to an IBM i server and running SQL queries. The client is designed to work with the [Mapepire Server Component](https://github.com/Mapepire-IBMi/mapepire-server)
 
-```sh
+## Setup
+
+`mapepire-python` requires Python 3.10 or later.
+
+
+:::note
+New websocket Implementation: As of version 0.2.0, `mapepire-python` uses the `websockets` library for websocket connections. If you are upgrading from a previous version, make sure to update your dependecies. The `websocket-client` library is no longer supported.
+- To update run `pip install -U mapepire-python`
+- More info on [websockets](https://websockets.readthedocs.io/en/stable/)
+:::
+
+
+### Install with `pip`
+
+`mapepire-python` is available on [PyPi](https://pypi.org/project/mapepire-python/). Just Run
+
+```bash
 pip install mapepire-python
 ```
-next, setup the server credentials used to connect to the server. One way to do this is to create a `mapepire.ini` file in the root of your project with the following content:
 
-```ini
+### Server Component Setup
+To use mapire-python, you will need to have the Mapepire Server Component running on your IBM i server. Follow these instructions to set up the server component: [Mapepire Server Installation](https://mapepire-ibmi.github.io/guides/sysadmin/)
+
+## Quick Start
+
+To get started with `mapepire-python`, you will need to setup a connection credentials for the Mapepire server. You can use a dictionary to store the connection details:
+
+```python
+from mapepire_python import connect
+
+creds = {
+  "host": "SERVER",
+  "port": 8076,
+  "user": "USER",
+  "password": "PASSWORD",
+}
+
+with connect(creds) as conn:
+    with conn.execute("select * from sample.employee") as cursor:
+        result = cursor.fetchone()
+        print(result)
+
+```
+
+## Other Connection options
+
+ > [!NOTE]
+ >  TLS support as of version 0.3.0 is now available. Server certificate verification is enabled by default. To disable certificate verification, set the `ignoreUnauthorized` field to `True` in the connection details.
+ > - To update run `pip install -U mapepire-python`
+ >
+ > - More info TLS Configuration [here](#tls-configuration)
+
+:::note
+TLS support as of version 0.3.0 is now available. Server certificate verification is enabled by default. To disable certificate verification, set the `ignoreUnauthorized` field to `True` in the connection details.
+- To update run `pip install -U mapepire-python`
+- More info TLS Configuration [here](#tls-configuration)
+:::
+
+ 
+
+There are three ways to configure mapepire server connection details using `mapepire-python`:
+
+1. Using the `DaemonServer` object
+2. Passing the connection details as a dictionary
+3. Using a config file (`.ini`) to store the connection details
+
+### 1. Using the `DaemonServer` object
+
+to use the `DaemonServer` object, you will need to import the `DaemonServer` class from the `mapepire_python.data_types` module:
+
+```python
+from mapepire_python.data_types import DaemonServer
+
+creds = DaemonServer(
+    host="SERVER",
+    port="PORT",
+    user="USER",
+    password="PASSWORD"
+)
+```
+
+Once you have created the `DaemonServer` object, you can pass it to the `SQLJob` object to connect to the mapepire server:
+
+```python
+from mapepire_python.client.sql_job import SQLJob
+from mapepire_python.data_types import DaemonServer
+
+creds = DaemonServer(
+    host="SERVER",
+    port="PORT",
+    user="USER",
+    password="PASSWORD"
+)
+
+job = SQLJob(creds)
+```
+
+### 2. Passing the connection details as a dictionary
+
+You can also use a dictionary to configure the connection details:
+
+```python
+from mapepire_python.client.sql_job import SQLJob
+
+creds = {
+  "host": "SERVER",
+  "port": "port",
+  "user": "USER",
+  "password": "PASSWORD",
+}
+
+job = SQLJob(creds)
+```
+
+this is a convenient way to pass the connection details to the mapepire server.
+
+### 3. Using a config file (`.ini`) to store the connection details
+
+
+If you use a config file (`.ini`), you can pass the path to the file as an argument:
+
+First create a `mapepire.ini` file in the root of your project with the following required fields:
+
+```ini title=mapepire.ini
 [mapepire]
 SERVER="SERVER"
 PORT="PORT"
@@ -22,127 +140,62 @@ USER="USER"
 PASSWORD="PASSWORD"
 ```
 
-The following script sets up a `DaemonServer` object that will be used to connect with the Server Component. Then a single `SQLJob` is created to facilitate the connection from the client side. 
+Then you can create a `SQLJob` object by passing the path to the `.ini` file which will handle the connection details
+
 
 ```python
-import configparser
 from mapepire_python.client.sql_job import SQLJob
+
+job = SQLJob("./mapepire.ini", section="mapepire")
+```
+
+The `section` argument is optional and allows you to specify a specific section in the `.ini` file where the connection details are stored. This allows you to store multiple connection details to different systems in the same file. If you do not specify a `section`, the first section in the file will be used. 
+
+### TLS Configuration
+
+Server certificate verification (`ssl.CERT_REQUIRED`) is enabled by default. To disable certificate verification, set the `ignoreUnauthorized` field to `True` in the connection details.
+
+get the server certificate:
+
+```python
 from mapepire_python.data_types import DaemonServer
+from mapepire_python.ssl import get_certificate
 
-config = configparser.ConfigParser()
-config.read('mapepire.ini')
+creds = DaemonServer(host=server, port=port, user=user, password=password)
+cert = get_certificate(creds)
+print(cert)
+```
 
-creds = DaemonServer(
-    host=config['mapepire']['SERVER'],
-    port=config['mapepire']['PORT'],
-    user=config['mapepire']['USER'],
-    password=config['mapepire']['PASSWORD'],
-    ignoreUnauthorized=True
-)
 
-with SQLJob(creds) as sql_job:
+
+## Usage
+
+Depending on your setup and use case, you can choose the most convenient way to configure the connection details. The following usage examples are compatible with all three connection options detailed above. For simplicity, we assume there is a `mapepire.ini` file in the root of the project with the connection details.
+
+
+There are four main ways to run queries using `mapepire-python`:
+1.  Using the `SQLJob` object to run queries synchronously
+2.  Using the `PoolJob` object to run queries asynchronously
+3.  Using the `Pool` object to run queries "concurrently"
+4.  Using PEP 249 Implementation
+
+
+
+### 1. Using the `SQLJob` object to run queries synchronously
+
+```python
+from mapepire_python.client.sql_job import SQLJob
+
+with SQLJob("./mapepire.ini") as sql_job:
     with sql_job.query("select * from sample.employee") as query:
         result = query.run(rows_to_fetch=1)
-        print(result)
+        print(result['data'])
 ```
 
 Here is the output from the script above:
 
 ```json
 {
-  "id":"query3",
-  "has_results":true,
-  "update_count":-1,
-  "metadata":{
-    "column_count":14,
-    "job":"330955/QUSER/QZDASOINIT",
-    "columns":[
-      {
-        "name":"EMPNO",
-        "type":"CHAR",
-        "display_size":6,
-        "label":"EMPNO"
-      },
-      {
-        "name":"FIRSTNME",
-        "type":"VARCHAR",
-        "display_size":12,
-        "label":"FIRSTNME"
-      },
-      {
-        "name":"MIDINIT",
-        "type":"CHAR",
-        "display_size":1,
-        "label":"MIDINIT"
-      },
-      {
-        "name":"LASTNAME",
-        "type":"VARCHAR",
-        "display_size":15,
-        "label":"LASTNAME"
-      },
-      {
-        "name":"WORKDEPT",
-        "type":"CHAR",
-        "display_size":3,
-        "label":"WORKDEPT"
-      },
-      {
-        "name":"PHONENO",
-        "type":"CHAR",
-        "display_size":4,
-        "label":"PHONENO"
-      },
-      {
-        "name":"HIREDATE",
-        "type":"DATE",
-        "display_size":10,
-        "label":"HIREDATE"
-      },
-      {
-        "name":"JOB",
-        "type":"CHAR",
-        "display_size":8,
-        "label":"JOB"
-      },
-      {
-        "name":"EDLEVEL",
-        "type":"SMALLINT",
-        "display_size":6,
-        "label":"EDLEVEL"
-      },
-      {
-        "name":"SEX",
-        "type":"CHAR",
-        "display_size":1,
-        "label":"SEX"
-      },
-      {
-        "name":"BIRTHDATE",
-        "type":"DATE",
-        "display_size":10,
-        "label":"BIRTHDATE"
-      },
-      {
-        "name":"SALARY",
-        "type":"DECIMAL",
-        "display_size":11,
-        "label":"SALARY"
-      },
-      {
-        "name":"BONUS",
-        "type":"DECIMAL",
-        "display_size":11,
-        "label":"BONUS"
-      },
-      {
-        "name":"COMM",
-        "type":"DECIMAL",
-        "display_size":11,
-        "label":"COMM"
-      }
-    ]
-  },
   "data":[
     {
       "EMPNO":"000010",
@@ -359,8 +412,11 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
 ## Allow all certificates
 
 On the `DaemonServer` interface, the `ignoreUnauthorized` set to `true` will allow either self-signed certificates or certificates from a CA.

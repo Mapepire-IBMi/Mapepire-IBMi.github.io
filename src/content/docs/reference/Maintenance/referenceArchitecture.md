@@ -5,6 +5,426 @@ sidebar:
     order: 0
 ---
 
+This document provides a detailed reference architecture for the client module in the Mapepire Python implementation. It is intended to serve as a guide for implementing Mapepire clients in other programming languages.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [SQLJob](#sqljob)
+  - [Class Structure](#sqljob-class-structure)
+  - [Initialization](#sqljob-initialization)
+  - [Connection Management](#connection-management)
+  - [Query Operations](#query-operations)
+  - [Job Status Management](#job-status-management)
+  - [Resource Management](#resource-management)
+- [Query](#query)
+  - [Class Structure](#query-class-structure)
+  - [Initialization](#query-initialization) 
+  - [Query State Management](#query-state-management)
+  - [Query Execution](#query-execution)
+  - [Data Fetching](#data-fetching)
+  - [Resource Management](#query-resource-management)
+- [Data Types](#data-types)
+  - [DaemonServer](#daemonserver)
+  - [QueryOptions](#queryoptions)
+  - [QueryState](#querystate)
+  - [JobStatus](#jobstatus)
+- [WebSocket Protocol](#websocket-protocol)
+  - [Connection Messages](#connection-messages)
+  - [Query Messages](#query-messages)
+  - [Response Handling](#response-handling)
+- [Error Handling](#error-handling)
+
+## Overview
+
+The Mapepire Python client module provides a WebSocket-based interface to connect to and interact with Mapepire servers. The architecture follows a job-based model where:
+
+1. A `SQLJob` establishes and maintains the WebSocket connection to the server
+2. The `Query` class handles the execution of SQL queries and management of their results
+3. Both classes work together to provide a complete client implementation for Mapepire
+
+This reference architecture aims to provide sufficient details for implementing compatible clients in other programming languages.
+
+## SQLJob
+
+### SQLJob Class Structure
+
+The `SQLJob` class extends the `BaseJob` abstract class, providing concrete implementations for establishing connections and executing queries.
+
+```python
+class SQLJob(BaseJob):
+    def __init__(self, creds=None, options={}, **kwargs):
+        # Initialization logic
+        
+    # Connection management methods
+    def connect(self, db2_server, **kwargs):
+        # Connection logic
+        
+    def close(self):
+        # Close connection logic
+        
+    # Query methods
+    def query(self, sql, opts=None):
+        # Create Query object
+        
+    def query_and_run(self, sql, opts=None, **kwargs):
+        # Create and execute Query
+        
+    def get_status(self):
+        # Return job status
+        
+    # Context management
+    def __enter__(self):
+        # Resource acquisition
+        
+    def __exit__(self, *args, **kwargs):
+        # Resource cleanup
+```
+
+### SQLJob Initialization
+
+The `SQLJob` is initialized with:
+
+- `creds`: Server credentials (optional during initialization, required before connection)
+- `options`: Dictionary of connection options
+- `**kwargs`: Additional keyword arguments
+
+During initialization, the SQLJob:
+1. Calls the parent class initializer
+2. Initializes the WebSocket connection to `None`
+3. Sets up internal state tracking (unique ID counter, response handling, job status)
+4. Generates a unique identifier for this job instance
+
+### Connection Management
+
+The `SQLJob` manages WebSocket connections to the Mapepire server:
+
+1. `_get_channel`: Creates a WebSocket connection to the server
+2. `connect`: Establishes a connection with the provided credentials 
+   - Parses connection input (dictionary, path to config file, or DaemonServer object)
+   - Creates a WebSocket channel
+   - Sends a connection message to the server
+   - Processes the response and updates job status
+3. `close`: Closes the connection and sets job status to `Ended`
+
+The connection protocol uses a JSON message format:
+
+```json
+{
+  "id": "[unique_id]",
+  "type": "connect",
+  "technique": "tcp",
+  "application": "Python Client",
+  "props": "[connection_props]"
+}
+```
+
+### Query Operations
+
+SQLJob provides methods for creating and executing queries:
+
+1. `query`: Creates a new `Query` object with the given SQL and options
+   - Returns a configured Query object but does not execute it
+2. `query_and_run`: Creates a Query object and immediately executes it
+   - Returns the query results
+   - Handles any exceptions that occur during execution
+
+### Job Status Management
+
+The SQLJob maintains an internal state tracking the connection status:
+- `NotStarted`: Initial state or after failed connection
+- `Ready`: After successful connection
+- `Busy`: (Not explicitly set in code)
+- `Ended`: After connection closure
+
+### Resource Management
+
+SQLJob implements the context manager protocol (`__enter__` and `__exit__`) to allow usage with Python's `with` statement, ensuring proper resource cleanup:
+
+```python
+with SQLJob(credentials) as job:
+    results = job.query_and_run("SELECT * FROM table")
+# Connection automatically closed when exiting the with block
+```
+
+## Query
+
+### Query Class Structure
+
+The `Query` class handles SQL query execution and result management:
+
+```python
+class Query(Generic[T]):
+    global_query_list = []  # Class variable tracking all queries
+    
+    def __init__(self, job, query, opts):
+        # Initialization logic
+        
+    # Query execution methods
+    def prepare_sql_execute(self):
+        # Prepare and execute SQL
+        
+    def run(self, rows_to_fetch=None):
+        # Run the query
+        
+    def fetch_more(self, rows_to_fetch=None):
+        # Fetch additional results
+        
+    def close(self):
+        # Close the query
+        
+    # Context management
+    def __enter__(self):
+        # Resource acquisition
+        
+    def __exit__(self, exc_type, exc_value, traceback):
+        # Resource cleanup
+```
+
+### Query Initialization
+
+The `Query` is initialized with:
+
+- `job`: A reference to the SQLJob managing the connection
+- `query`: The SQL query string to execute
+- `opts`: A QueryOptions object controlling execution behavior
+
+During initialization, the Query:
+1. Stores references to the job and SQL
+2. Processes options (is_prepared, parameters, is_cl_command, should_auto_close, is_terse_results)
+3. Sets initial state to `NOT_YET_RUN`
+4. Adds itself to the global query list
+
+### Query State Management
+
+The `Query` maintains an internal state tracking execution progress:
+- `NOT_YET_RUN`: Initial state
+- `RUN_MORE_DATA_AVAIL`: After execution with more results available
+- `RUN_DONE`: After all results have been fetched or the query is closed
+- `ERROR`: If an error occurs during execution
+
+### Query Execution
+
+Query provides methods for executing SQL:
+
+1. `_execute_query`: Internal method that sends a query message and receives the response
+2. `prepare_sql_execute`: Prepares a SQL statement with parameters
+3. `run`: Executes the query with optional row count limit
+   - Handles different query types (SQL vs. CL command)
+   - Updates query state based on response
+   - Captures correlation ID for future fetch operations
+4. `fetch_more`: Retrieves additional rows when more results are available
+
+### Data Fetching
+
+The data fetching protocol uses a continuation-based approach:
+
+1. Initial query execution returns a limited number of rows
+2. If more rows are available, the `is_done` flag is set to false
+3. Subsequent `fetch_more` calls use the correlation ID to retrieve more rows
+4. When all data is retrieved, the `is_done` flag is set to true
+
+### Query Resource Management
+
+Query implements the context manager protocol (`__enter__` and `__exit__`) to ensure proper resource cleanup:
+
+```python
+with job.query("SELECT * FROM table") as query:
+    results = query.run()
+    # If more results available
+    while query.state != QueryState.RUN_DONE:
+        more_results = query.fetch_more()
+# Query automatically closed when exiting the with block
+```
+
+## Data Types
+
+### DaemonServer
+
+The `DaemonServer` dataclass encapsulates server connection parameters:
+
+```python
+@dataclass
+class DaemonServer:
+    host: str                          # Server hostname
+    user: str                          # Username
+    password: str                      # Password
+    port: Optional[Union[str, int]]    # Server port
+    ignoreUnauthorized: Optional[bool] # Whether to ignore TLS verification errors
+    ca: Optional[Union[str, bytes]]    # Certificate Authority for TLS verification
+```
+
+### QueryOptions
+
+The `QueryOptions` dataclass configures query execution behavior:
+
+```python
+@dataclass
+class QueryOptions:
+    isTerseResults: Optional[bool]   # Whether to return simplified results
+    isClCommand: Optional[bool]      # Whether the query is a CL command
+    parameters: Optional[List[Any]]  # Query parameters for prepared statements
+    autoClose: Optional[bool]        # Whether to auto-close the query
+```
+
+### QueryState
+
+The `QueryState` enum tracks the execution state of a query:
+
+```python
+class QueryState(Enum):
+    NOT_YET_RUN = (1,)         # Query not executed yet
+    RUN_MORE_DATA_AVAIL = (2,) # Query executed, more data available
+    RUN_DONE = (3,)            # Query execution complete
+    ERROR = 4                  # Error occurred during execution
+```
+
+### JobStatus
+
+The `JobStatus` enum tracks the state of a SQLJob:
+
+```python
+class JobStatus(Enum):
+    NotStarted = "notStarted"           # Initial state
+    Ready = "ready"                     # Connected and ready
+    Busy = "busy"                       # Executing a query
+    Ended = "ended"                     # Connection closed
+```
+
+## WebSocket Protocol
+
+The Mapepire client communicates with the server using a JSON-based WebSocket protocol.
+
+### Connection Messages
+
+Connection establishment:
+
+```json
+{
+  "id": "[unique_id]",
+  "type": "connect",
+  "technique": "tcp",
+  "application": "Python Client",
+  "props": "[connection_properties]"
+}
+```
+
+Connection response:
+
+```json
+{
+  "id": "[unique_id]",
+  "success": true,
+  "job": "[job_id]",
+  "sql_rc": 0,
+  "sql_state": ""
+}
+```
+
+### Query Messages
+
+SQL Query:
+
+```json
+{
+  "id": "[unique_id]",
+  "type": "sql",
+  "sql": "[sql_statement]",
+  "terse": false,
+  "rows": 100
+}
+```
+
+Prepared Statement:
+
+```json
+{
+  "id": "[unique_id]",
+  "type": "prepare_sql_execute",
+  "sql": "[sql_statement]",
+  "rows": 100,
+  "parameters": ["[param1]", "[param2]", ...]
+}
+```
+
+Fetch More:
+
+```json
+{
+  "id": "[unique_id]",
+  "cont_id": "[correlation_id]",
+  "type": "sqlmore",
+  "sql": "[sql_statement]",
+  "rows": 100
+}
+```
+
+Close Query:
+
+```json
+{
+  "id": "[unique_id]",
+  "cont_id": "[correlation_id]",
+  "type": "sqlclose"
+}
+```
+
+CL Command:
+
+```json
+{
+  "id": "[unique_id]",
+  "type": "cl",
+  "terse": false,
+  "cmd": "[cl_command]"
+}
+```
+
+### Response Handling
+
+All server responses follow a common structure with specialized fields:
+
+```json
+{
+  "id": "[unique_id]",
+  "success": true|false,
+  "sql_rc": 0,
+  "sql_state": "",
+  "error": "[error_message]",
+  "is_done": true|false,
+  "has_results": true|false,
+  "update_count": 0,
+  "metadata": {
+    "column_count": 3,
+    "columns": [
+      {
+        "display_size": 10,
+        "label": "COLUMN1",
+        "name": "COLUMN1",
+        "type": "INTEGER"
+      },
+      ...
+    ]
+  },
+  "data": [
+    ["row1_col1", "row1_col2", ...],
+    ["row2_col1", "row2_col2", ...],
+    ...
+  ]
+}
+```
+
+## Error Handling
+
+The Mapepire client implements error handling through several mechanisms:
+
+1. The `@handle_ws_errors` decorator catches and processes WebSocket-related exceptions
+2. Connection failures update the job status and raise exceptions with error details
+3. Query execution failures update the query state to `ERROR` and raise exceptions
+4. The context manager protocol ensures resources are properly cleaned up even when errors occur
+
+When implementing clients in other languages, it is important to maintain similar error handling patterns to ensure robustness and resource cleanup.
+
 This is an outline of the Python reference archetecture for `Mapepire`. The core components of the reference archetecture are the `SQLJob` and `Query` classes. The `SQLJob` class manages the WebSocket connection to the server and provides methods to create and run queries. The `Query` class manages the state of the query, sends it to the server, and fetches results.
 
 ## Core Functions

@@ -13,10 +13,10 @@ Available:
 * [Java](/guides/usage/java)
 
 Future SDKs:
+
 * C#/.NET Core
 * PHP
 * Go
-
 
 ### App examples
 
