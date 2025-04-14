@@ -23,7 +23,14 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 
 ## Specifying the `mapepire-server` Instance for the Connection
 
-The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/samples/blob/main/java/simple-app/src/main/resources/config.properties.sample) file from the [simple-app](https://github.com/Mapepire-IBMi/samples/tree/main/java/simple-app) demo project to `config.properties` and fill in the credentials.
+The location and port of the `mapepire-server` instance as well as the credentials for IBM i Db2 can be specified in a `config.properties` file. Copy the [`config.properties.sample`](https://github.com/Mapepire-IBMi/samples/blob/main/java/simple-app/src/main/resources/config.properties.sample) file from the [simple-app](https://github.com/Mapepire-IBMi/samples/tree/main/java/simple-app) demo project to `config.properties` and fill in the credentials. Note that the `IBMI_PORT` is set to where the mapepire server is running.
+
+```ini
+IBMI_HOST=host.somewhere.com
+IBMI_USER=JIMBOB
+IBMI_PASSWORD=letMeInNow
+IBMI_PORT=8076
+```
 
 The following function can be used to construct a `DaemonServer` object with the credentials you just specified. This object will be passed to a `SqlJob` or `Pool` object.
 
@@ -64,11 +71,52 @@ job.connect(creds).get();
 
 // Initialize and execute query
 Query query = job.query("SELECT * FROM SAMPLE.DEPARTMENT");
-QueryResult<Object> result = query.execute().get();
+QueryResult<Object> result = query.execute(3).get();
 
 // Close query and job
 query.close().get();
 job.close();
+
+// Convert to JSON string and output
+ObjectMapper mapper = new ObjectMapper();
+mapper.enable(SerializationFeature.INDENT_OUTPUT);
+String jsonString = mapper.writeValueAsString(result);
+System.out.println(jsonString);
+```
+
+Output:
+
+```json
+{
+  "id" : "query3",
+  "success" : true,
+  "error" : null,
+  "sql_rc" : 0,
+  "sql_state" : null,
+  "execution_time" : 174,
+  "metadata" : {
+    "column_count" : 5,
+    "columns" : [ 
+      { "display_size" : 3, "label" : "DEPTNO", "name" : "DEPTNO", "type" : "CHAR", "precision" : 3, "scale" : 0 },
+      { "display_size" : 36, "label" : "DEPTNAME", "name" : "DEPTNAME", "type" : "VARCHAR", "precision" : 36, "scale" : 0 },
+      { "display_size" : 6, "label" : "MGRNO", "name" : "MGRNO", "type" : "CHAR", "precision" : 6, "scale" : 0 },
+      { "display_size" : 3, "label" : "ADMRDEPT", "name" : "ADMRDEPT", "type" : "CHAR", "precision" : 3, "scale" : 0 },
+      { "display_size" : 16, "label" : "LOCATION", "name" : "LOCATION", "type" : "CHAR", "precision" : 16, "scale" : 0 }
+    ],
+    "job" : "058971/QUSER/QZDASOINIT",
+    "parameters" : null
+  },
+  "is_done" : false,
+  "has_results" : true,
+  "update_count" : -1,
+  "data" : [ 
+    { "DEPTNO" : "A00", "DEPTNAME" : "SPIFFY COMPUTER SERVICE DIV.", "MGRNO" : "000010", "ADMRDEPT" : "A00", "LOCATION" : null },
+    { "DEPTNO" : "B01", "DEPTNAME" : "PLANNING", "MGRNO" : "000020", "ADMRDEPT" : "A00", "LOCATION" : null },
+    { "DEPTNO" : "C01", "DEPTNAME" : "INFORMATION CENTER", "MGRNO" : "000030", "ADMRDEPT" : "A00", "LOCATION" : null }
+  ],
+  "parameter_count" : 0,
+  "output_parms" : null
+}
 ```
 
 ### Prepared Statements 
@@ -78,6 +126,21 @@ Statements can be easily prepared and executed with parameters:
 ```java
 QueryOptions options = new QueryOptions(false, false, Arrays.asList("A00"));
 Query query = job.query("SELECT * FROM SAMPLE.DEPARTMENT WHERE ADMRDEPT = ?", options);
+QueryResult<Object> result = query.execute().get();
+```
+
+### Batch Queries
+
+Multiple queries can be executed in a batch:
+
+```java
+QueryOptions options = new QueryOptions(false, false, Arrays.asList(
+    Arrays.asList("SAM", "416 345 0879"),
+    Arrays.asList("BOB", "647 821 7261"),
+    Arrays.asList("JOHN", "289 726 1823"),
+    Arrays.asList("JANE", "416 345 0879")
+));
+Query query = job.query("INSERT INTO SAMPLE.EMPLOYEE VALUES (?, ?)", options);
 QueryResult<Object> result = query.execute().get();
 ```
 
@@ -143,6 +206,22 @@ SqlJob job = new SqlJob(jdbcOptions);
 // Create a pool with JDBC options
 PoolOptions poolOptions = new PoolOptions(creds, jdbcOptions, 5, 3);
 Pool pool = new Pool(poolOptions);
+```
+
+## Job Status and Query State
+
+For any `SqlJob` object, you can check its status via its [JobStatus](https://github.com/Mapepire-IBMi/mapepire-java/blob/main/src/main/java/io/github/mapepire_ibmi/types/JobStatus.java):
+
+```java
+SqlJob job = new SqlJob();
+JobStatus status = job.getStatus();
+```
+
+Similarily, you can check the state of a query via its [QueryState](https://github.com/Mapepire-IBMi/mapepire-java/blob/main/src/main/java/io/github/mapepire_ibmi/types/QueryState.java):
+
+```java
+Query query = job.query("SELECT * FROM SAMPLE.DEPARTMENT");
+QueryState state = query.getState();
 ```
 
 ## Exception Handling
