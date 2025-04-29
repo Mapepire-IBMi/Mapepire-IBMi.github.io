@@ -33,7 +33,8 @@ const creds: DaemonServer = {
   host: process.env.DB2_HOST,
   user: process.env.DB2_USER,
   password: process.env.DB2_PASS,
-  ignoreUnauthorized: true //Only if Mapepire runs with a self-signed certificate
+  rejectUnauthorized: true //Only if Mapepire runs with a self-signed certificate
+  // prior to https://github.com/Mapepire-IBMi/mapepire-js/pull/29 ignoreUnauthorized was used instead of rejectUnauthorized
 }
 ```
 
