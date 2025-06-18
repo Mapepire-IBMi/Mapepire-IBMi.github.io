@@ -412,11 +412,6 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
 ## Allow all certificates
 
 On the `DaemonServer` interface, the `ignoreUnauthorized` set to `true` will allow either self-signed certificates or certificates from a CA.
