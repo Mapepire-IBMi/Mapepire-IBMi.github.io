@@ -137,6 +137,49 @@ If no certificate is otherwise configured, the Mapepire server will automaticall
 
 ## Exit Points
 
-Yes, Mapepire will use the same exit points as typical JDBC application.
+Yes, Mapepire will use the same exit points as typical JDBC application. 
+See more on this [IBM Support page](https://www.ibm.com/support/pages/node/7073452).
 
-See more on this [IBM Support page](https://www.ibm.com/support/pages/node/7073452).https://www.ibm.com/support/pages/node/7073452
+
+### Filtering IP addresses by exit point
+Unfortunately due to the project's design, 
+all client connections will appear as coming from `127.0.0.1`. As such, user-based exit point rules will "just work" whereby IP address-based rules will require additional logic. In order to enforce IP address rules, the exit program will need to inspect the `CLIENT_WRKSTNNAME` client special register to extract the IP address of the client.
+
+
+## Connection rules via configuration file
+
+Mapepire supports user-based and IP-based restrictions, which can be configured by the system administrator in the following
+configuration file:
+
+```
+/QOpenSys/etc/mapepire/iprules.conf
+```
+
+(In the future, we will also support a "drop-in" directory, allowing you to split rules into multiple files)
+
+The format for this configuration file is as follows:
+- Comment lines begin with a leading `#`
+- Rules are defined in the format `allow <username>@<ip-address>` `deny <username>@<ip-address>` 
+- The `*` wildcard can be used at any place in the username or IP address
+- For any specific connection, the last matching rule takes precedence
+
+#### Example: disable logins from user profiles starting with `Q`
+
+```py
+# Allow connections from all hosts
+allow *@*
+
+# Deny logins from users starting with the letter Q
+deny q*@*
+```
+
+#### Example: only allow specific users from a specific IP range
+
+```py
+# Deny by default
+deny *@*
+
+# Allow only appusr1 and appusr2, and only from 192.168.*.*
+allow  appusr1@192.168.*
+allow  appusr2@192.168.*
+```
