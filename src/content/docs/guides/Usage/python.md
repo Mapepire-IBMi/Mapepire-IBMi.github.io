@@ -183,11 +183,13 @@ First create a `mapepire.ini` file in the root of your project with the followin
 
 ```ini title=mapepire.ini
 [mapepire]
-SERVER="SERVER"
-PORT="PORT"
-USER="USER"
-PASSWORD="PASSWORD"
+host=SERVER
+port=PORT
+user=USER
+password=PASSWORD
 ```
+
+> **Note:** The keys must match the `DaemonServer` fields (`host`, `port`, `user`, `password`), and values must **not** be quoted — write `host=myhost`, not `host="myhost"`.
 
 Then you can create a `SQLJob` object by passing the path to the `.ini` file which will handle the connection details
 
@@ -272,95 +274,9 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("mapepire_python").setLevel(logging.DEBUG)
 ```
 
-## Usage
-
-Depending on your setup and use case, you can choose the most convenient way to configure the connection details. The following usage examples are compatible with all four connection options detailed above. For simplicity, we assume there is a `mapepire.ini` file in the root of the project with the connection details.
-
-
-There are four main ways to run queries using `mapepire-python`:
-1.  Using the `SQLJob` object to run queries synchronously
-2.  Using the `PoolJob` object to run queries asynchronously
-3.  Using the `Pool` object to run queries "concurrently"
-4.  Using PEP 249 Implementation
-
-
-
-### 1. Using the `SQLJob` object to run queries synchronously
-
-```python
-from mapepire_python import SQLJob
-
-with SQLJob("./mapepire.ini") as sql_job:
-    with sql_job.query("select * from sample.employee") as query:
-        result = query.run(rows_to_fetch=1)
-        print(result['data'])
-```
-
-Here is the output from the script above:
-
-```json
-{
-  "data":[
-    {
-      "EMPNO":"000010",
-      "FIRSTNME":"CHRISTINE",
-      "MIDINIT":"I",
-      "LASTNAME":"HAAS",
-      "WORKDEPT":"A00",
-      "PHONENO":"3978",
-      "HIREDATE":"01/01/65",
-      "JOB":"PRES",
-      "EDLEVEL":18,
-      "SEX":"F",
-      "BIRTHDATE":"None",
-      "SALARY":52750.0,
-      "BONUS":1000.0,
-      "COMM":4220.0
-    }
-  ],
-  "is_done":false,
-  "success":true
-}
-
-```
-The results object is a JSON object that contains the metadata and data from the query. Here are the different fields returned:
-- `id` field contains the query ID
-- `has_results` field indicates whether the query returned any results
-- `update_count` field indicates the number of rows updated by the query (-1 if the query did not update any rows)
-- `metadata` field contains information about the columns returned by the query
-- `data` field contains the results of the query
-- `is_done` field indicates whether the query has finished executing
-- `success` field indicates whether the query was successful
-
-### Configure Connection Details with `.ini` file
-
-The connection details can be stored in a `.ini` file and passed directly to `SQLJob` or `PoolJob` objects:
-
-```ini title=mapepire.ini
-[myserver]
-SERVER="SERVER"
-PORT="PORT"
-USER="USER"
-PASSWORD="PASSWORD"
-```
-
-Then pass the path to the `.ini` file and the section name to the `SQLJob` object:
-
-```python
-from mapepire_python import SQLJob
-
-with SQLJob("./mapepire.ini", section="myserver") as sql_job:
-    with sql_job.query("select * from sample.employee") as query:
-        result = query.run(rows_to_fetch=1)
-        print(result)
-```
-
-If `section` is not provided, the first section in the `.ini` file will be used.
-
-
 ## Running Queries
 
-The following examples all assume that the connection details are stored in a `.ini` file called `mapepire.ini` in the root of the project.
+The following examples all assume that the connection details are stored in a `.ini` file called `mapepire.ini` in the root of the project. All four connection options from [Other Connection Options](#other-connection-options) are interchangeable anywhere a credentials argument is accepted.
 
 There are four main ways to run queries using `mapepire-python`:
 1.  Using the `SQLJob` object to run queries synchronously
@@ -380,6 +296,52 @@ with SQLJob("./mapepire.ini") as sql_job:
         result = query.run(rows_to_fetch=1)
         print(result)
 ```
+
+Here is the output from the script above:
+
+```json
+{
+  "id": "query-1",
+  "has_results": true,
+  "update_count": -1,
+  "metadata": {
+    "columns": [
+      { "name": "EMPNO",    "type": "CHAR",    "display_size": 6  },
+      { "name": "FIRSTNME", "type": "VARCHAR", "display_size": 12 },
+      { "name": "LASTNAME", "type": "VARCHAR", "display_size": 15 }
+    ]
+  },
+  "data": [
+    {
+      "EMPNO": "000010",
+      "FIRSTNME": "CHRISTINE",
+      "MIDINIT": "I",
+      "LASTNAME": "HAAS",
+      "WORKDEPT": "A00",
+      "PHONENO": "3978",
+      "HIREDATE": "01/01/65",
+      "JOB": "PRES",
+      "EDLEVEL": 18,
+      "SEX": "F",
+      "BIRTHDATE": "None",
+      "SALARY": 52750.0,
+      "BONUS": 1000.0,
+      "COMM": 4220.0
+    }
+  ],
+  "is_done": false,
+  "success": true
+}
+```
+
+The result object is a JSON object that contains the metadata and data from the query. Here are the different fields returned:
+- `id` — the query ID
+- `has_results` — whether the query returned any rows
+- `update_count` — number of rows updated by the query (`-1` if the query was not an update)
+- `metadata` — information about the columns returned by the query (name, type, display size, etc.)
+- `data` — the result rows
+- `is_done` — whether all rows have been fetched
+- `success` — whether the query executed successfully
 
 #### Query and run
 
