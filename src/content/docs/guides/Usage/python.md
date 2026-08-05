@@ -29,10 +29,38 @@ New websocket Implementation: As of version 0.2.0, `mapepire-python` uses the `w
 pip install mapepire-python
 ```
 
+:::caution[Linux / macOS: `gssapi` system dependency required]
+`mapepire-python` imports `gssapi` at startup for Kerberos authentication support. On Linux and macOS this requires the Kerberos development headers to be installed **before** running `pip install gssapi` (which is pulled in transitively).
+
+**Debian / Ubuntu**
+```bash
+sudo apt install libkrb5-dev
+pip install gssapi
+```
+
+**RHEL / Fedora / CentOS**
+```bash
+sudo dnf install krb5-devel
+pip install gssapi
+```
+
+**macOS (Homebrew)**
+```bash
+brew install krb5
+pip install gssapi
+```
+
+If you are on Windows, the native SSPI stack is used instead and no extra installation is needed.
+:::
+
 ### Server Component Setup
 To use mapire-python, you will need to have the Mapepire Server Component running on your IBM i server. Follow these instructions to set up the server component: [Mapepire Server Installation](https://mapepire-ibmi.github.io/guides/sysadmin/)
 
 ## Quick Start
+
+:::note
+**Linux / macOS users:** `mapepire-python` unconditionally imports `gssapi` at startup. If the module is missing you will see a `ModuleNotFoundError: No module named 'gssapi'` error even for plain password-based connections. Install the system Kerberos development headers and then `pip install gssapi` before running your script. See the [install instructions above](#install-with-pip) for platform-specific commands.
+:::
 
 To get started with `mapepire-python`, you will need to setup a connection credentials for the Mapepire server. You can use a dictionary to store the connection details:
 
