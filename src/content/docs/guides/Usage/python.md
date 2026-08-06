@@ -60,7 +60,7 @@ To use mapire-python, you will need to have the Mapepire Server Component runnin
 **Linux users:** `mapepire-python`'s `gssapi` dependency compiles against your system's Kerberos headers during install. If `pip install mapepire-python` fails with `krb5-config: not found`, install `libkrb5-dev` (Debian/Ubuntu) or `krb5-devel` (RHEL/Fedora) first — see the [install instructions above](#install-with-pip).
 :::
 
-To get started with `mapepire-python`, you will need to setup a connection credentials for the Mapepire server. You can use a dictionary to store the connection details:
+To get started with `mapepire-python`, you will need to set up connection credentials for the Mapepire server. You can use a dictionary to store the connection details:
 
 ```python
 from mapepire_python import connect
