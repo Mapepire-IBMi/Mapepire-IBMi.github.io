@@ -27,10 +27,36 @@ New websocket Implementation: As of version 0.2.0, `mapepire-python` uses the `w
 pip install mapepire-python
 ```
 
+:::caution[Linux: `krb5-config` build dependency required]
+`mapepire-python` depends on `gssapi` on Linux and macOS for Kerberos authentication support, and it is installed automatically as part of `pip install mapepire-python` — no separate `pip install gssapi` step is needed.
+
+On **Linux**, `gssapi` compiles a native extension against your system's Kerberos headers, so you must install those headers **before** running `pip install mapepire-python`, or the build will fail with an error like `krb5-config: not found`.
+
+**Debian / Ubuntu**
+```bash
+sudo apt install libkrb5-dev
+pip install mapepire-python
+```
+
+**RHEL / Fedora / CentOS**
+```bash
+sudo dnf install krb5-devel
+pip install mapepire-python
+```
+
+On **macOS**, no extra step is needed — macOS ships its own GSSAPI/Kerberos framework and headers, so `gssapi` builds out of the box.
+
+On **Windows**, `pywin32` is **not** bundled with Python or the OS — it is installed automatically as a `pip` dependency when you run `pip install mapepire-python`, so no separate `pip install pywin32` step is needed. It provides native SSPI support for Kerberos/Windows authentication.
+:::
+
 ### Server Component Setup
 To use `mapepire-python`, you will need to have the Mapepire Server Component running on your IBM i server. Follow these instructions to set up the server component: [Mapepire Server Installation](https://mapepire-ibmi.github.io/guides/sysadmin/)
 
 ## Quick Start
+
+:::note
+**Linux users:** `mapepire-python`'s `gssapi` dependency compiles against your system's Kerberos headers during install. If `pip install mapepire-python` fails with `krb5-config: not found`, install `libkrb5-dev` (Debian/Ubuntu) or `krb5-devel` (RHEL/Fedora) first — see the [install instructions above](#install-with-pip).
+:::
 
 To get started with `mapepire-python`, you will need to set up connection credentials for the Mapepire server. You can use a dictionary to store the connection details:
 
