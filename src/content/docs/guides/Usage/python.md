@@ -48,7 +48,7 @@ pip install mapepire-python
 
 On **macOS**, no extra step is needed — macOS ships its own GSSAPI/Kerberos framework and headers, so `gssapi` builds out of the box.
 
-On **Windows**, `pywin32` is installed automatically and used for native SSPI support — no extra installation is needed there either.
+On **Windows**, `pywin32` is **not** bundled with Python or the OS — it is installed automatically as a `pip` dependency when you run `pip install mapepire-python`, so no separate `pip install pywin32` step is needed. It provides native SSPI support for Kerberos/Windows authentication.
 :::
 
 ### Server Component Setup
