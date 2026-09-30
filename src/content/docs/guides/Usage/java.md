@@ -13,7 +13,7 @@ Using DB2 for IBM i with Java is now easy with the help of the `mapepire-java` c
 <dependency>
     <groupId>io.github.mapepire-ibmi</groupId>
     <artifactId>mapepire-sdk</artifactId>
-    <version>0.1.0</version>  <!-- Use the latest version -->
+    <version>1.0.0</version>  <!-- Use the latest version -->
 </dependency>
 ```
 
@@ -153,6 +153,14 @@ Query query = job.clCommand("CRTLIB LIB(MYLIB1) TEXT('My cool library')");
 QueryResult<Object> result = query.execute().get();
 ```
 
+The HTML and UIM documentation for a CL command can be retrieved using the `getClDoc` API on a job by passing the fully qualified IFS path of the command object:
+
+```java
+GetClDocResult doc = job.getClDoc("/QSYS.LIB/CRTLIB.CMD").get();
+String html = doc.getHtml();
+String uim = doc.getUim();
+```
+
 ### Paginating Results
 
 Paginating results can be easily achieved using the `rowsToFetch` parameter when executing a query along with the `fetchMore` API to retrieve more results.
@@ -162,9 +170,9 @@ Paginating results can be easily achieved using the `rowsToFetch` parameter when
 Query query = job.query("SELECT * FROM SAMPLE.EMPLOYEE");
 QueryResult<Object> result = query.execute(10).get();
 
-// Continuously fetch 10 more rows until all all rows have been returned
+// Continuously fetch 10 more rows until all rows have been returned
 while (!result.getIsDone()) {
-    result = query.fetchMore(50).get();
+    result = query.fetchMore(10).get();
 }
 ```
 
@@ -208,6 +216,21 @@ PoolOptions poolOptions = new PoolOptions(creds, jdbcOptions, 5, 3);
 Pool pool = new Pool(poolOptions);
 ```
 
+## Request Timeouts
+
+A timeout can be set for requests sent to the server, including connecting, executing queries, and fetching more rows. A request that does not receive a response in time fails with a `RequestTimeoutException`. By default, requests never time out.
+
+```java
+// Time out any request sent by a single job after 30 seconds
+SqlJob job = new SqlJob();
+job.setRequestTimeout(30000);
+
+// Time out any request sent by jobs in a pool after 30 seconds
+PoolOptions poolOptions = new PoolOptions(creds, 5, 3);
+poolOptions.setRequestTimeout(30000);
+Pool pool = new Pool(poolOptions);
+```
+
 ## Job Status and Query State
 
 For any `SqlJob` object, you can check its status via its [JobStatus](https://github.com/Mapepire-IBMi/mapepire-java/blob/main/src/main/java/io/github/mapepire_ibmi/types/JobStatus.java):
@@ -231,6 +254,9 @@ The APIs provided by the client SDK can throw various checked exceptions which s
 * `SQLException` - This is thrown when an SQL related exception occurs. This will also typically communicate a `reason` and `SQLState`.
 * `UnknownServerException` - This is throw when the server hits an unknown exception.
 * `ClientException` - This is thrown when the client SDK wants to communicate an error with calling an API.
+* `RequestTimeoutException` - This is a `ClientException` thrown when a request does not receive a response within the configured [request timeout](#request-timeouts). It provides the ID of the request and the timeout that was exceeded.
+
+Since the APIs return a `CompletableFuture`, these exceptions are wrapped in an `ExecutionException` when calling `get()` and can be retrieved using `getCause()`.
 
 ## Secure Connections
 
