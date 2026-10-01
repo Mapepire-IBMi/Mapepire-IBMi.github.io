@@ -2,7 +2,7 @@
 title: Python
 description: Using Mapepire with Python
 sidebar:
-    order: 4
+    order: 5
 ---
 
 Find the source code for the python client: [client SDK project page](https://github.com/Mapepire-IBMi/mapepire-python).

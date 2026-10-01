@@ -11,6 +11,7 @@ Available:
 * [Python](/guides/usage/python)
 * [Node.js](/guides/usage/nodejs)
 * [Java](/guides/usage/java)
+* [JDBC](/guides/usage/jdbc)
 
 Future SDKs:
 
