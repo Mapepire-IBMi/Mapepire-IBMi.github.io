@@ -11,12 +11,13 @@ Available:
 * [Python](/guides/usage/python)
 * [Node.js](/guides/usage/nodejs)
 * [Java](/guides/usage/java)
+* [JDBC](/guides/usage/jdbc)
 
 Future SDKs:
+
 * C#/.NET Core
 * PHP
 * Go
-
 
 ### App examples
 

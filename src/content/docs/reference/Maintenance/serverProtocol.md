@@ -3,23 +3,87 @@ title: Server protocol
 description: Websocket flow
 ---
 
-1. When the mapepire-server is started, it opens a websocket at `wss://<db2ServerHostname>:8076/db/` and listens for connections.
-2. The client calls `connect` either directly with an instance of the `SQLJob` class or indirectly using the `init` method of the `Pool` class to initiate a connection with the server.
-3. Calling the execute method of the `SQLJob`, `Query`, or `Pool` class will send a query object to the server with the following format:
-    ```
-    {
-        id: string
-        type: string
-        sql: string
-        cmd: string
-        terse: boolean
-        rows: number,
-        parameters: any[]
-    }
-    ```
-4. The server responds by sending back a message to the client with the corresponding query id, and some associated information. Ex.
-    ```
-    {"id":"query12","has_results":true,"update_count":-1,"metadata":{"column_count":1,"job":"057235/QUSER/QZDASOINIT","columns":[{"name":"00001","type":"VARCHAR","display_size":28,"label":"00001"}]},"data":[{"00001":"057235/QUSER/QZDASOINIT"}],"is_done":true,"success":true}
-    ```
+The data stream is relatively simple. Requests and responses are newline-delimited and are formatted in JSON. 
 
-5. The socket connection can be closed by calling the `close` method if the `SQLJob` or `Query` class was being used or the `end` method if the `Pool` class was used.
+All requests require these two fields to be specified:
+
+- `id` (string): Since the server can process requests asynchronously, responses are not
+   guaranteed back in the same order as requests were sent. The `id` field passed into
+   the request will be included in the response so that the client can match it up
+   to the request. This can be any string, but should be unique for obvious reasons
+- `type` (string): this specifies the type of request
+
+All responses will include these fields:
+
+- `id` (string): corresponding to the request ID
+- `success` (boolean): whether or not the request was successful
+- `execution_time` (long): elapsed time in millis
+
+If an error occurs, all responses will include these fields:
+
+- `error`: a description of the error
+
+Under certain error conditions, responses may contain one or more of these fields:
+
+- `sql_rc`: the SQL error code
+- `sql_state`: the SQL state
+
+The following request types are currently supported
+
+| Type          | Description   | Additional input fields  | Additional output fields  |
+| ------------- | ------------- | ------------- | -------------  |
+| `connect`     | Connect to the database (implicitly disconnects any existing connection) | `props`: a semicolon-delimited list of connection properties <br/> `application`: the application name (for use in Client Special Registers) <br/> `technique`: database connection technique (`cli` or `tcp`) | `job`: the server job | 
+| `cl`          | Run CL command  | `cmd`: the CL command | `data`: the resulting job log entries | 
+| `sql`         | Run SQL  | `sql`: the SQL statement <br/> `rows`: the maximum number of rows to return on the first request <br/> `terse`: return data in terse format | `metadata`: metadata about the result set <br/> `data`: the data <br/> `is_done`: whether all rows were fetched | 
+| `prepare_sql`         | Prepare SQL statement  | `sql`: the SQL statement <br/> `terse`: return data in terse format | 
+| `execute`         | Execute prepared SQL statement  | `cont_id`: the request ID of the previously-run `sql` or `prepare_sql` <br /> `parameters`: array parameter values corresponding to any parameter markers used. If `parameters` is an array of arrays, then the sql operations are executed as a batch. |   `data`: the data |
+| `prepare_sql_execute`         | Prepare and execute SQL statement  | `parameters`: array parameter values <br/> `terse`: return data in terse format |  `data`: the data |
+| `sqlmore`     | fetch more rows from a previous `sql`/`prepare_sql`/`prepare_sql_execute` request  | `cont_id`: the request ID of the previously-run `sql`/`prepare_sql`/`prepare_sql_execute` request <br/> `rows`: the maximum number of rows to return | `data`: the data <br/> `is_done`: whether all rows were fetched | 
+| `sqlclose`     | close cursor from a previous `sql`/`prepare_sql`/`prepare_sql_execute` request  | `cont_id`: the request ID of the previously-run `sql`/`prepare_sql`/`prepare_sql_execute` request |  | 
+| `getdbjob`     | Get server job for database tasks  |  | `job`: the server job | 
+| `getversion`   | Get version info  |  | `build_date`: build date <br/> `version`: version | 
+| `ping`         | Liveness check |  | `alive`: this program is still responsive <br/> `db_alive`: there is an active connection to the database |
+| `setconfig`    | Set configuration options | `tracelevel`: see valid trace levels, below <br/> `tracedest`: one of (`file`, `in_mem`) <br/> `jtopentracelevel`: see valid trace levels, below <br/> `jtopentracedest`: one of (`file`, `in_mem`) | `tracedest`, `tracelevel`,`jtopentracedest`, `jtopentracelevel`, | 
+| `gettracedata` | Get trace data |  | `tracedata`: the trace data (as a singular HTML string) <br/> `jtopentracedata`: the JtOpen trace data (plain text) |
+| `exit      `   | Exit  |  |  | 
+
+Valid trace levels:
+- `OFF`: off
+- `ON`: all except datastream
+- `ERRORS`: errors only
+- `DATASTREAM`: all including data stream
+- `INPUT_AND_ERRORS`: errors and data stream inputs
+
+## Examples
+
+Example request to exit gracefully:
+```json
+{"id": "bye", "type": "exit"}
+```
+
+Example to connect to the database with an initial library list
+```json
+{"id": "conn14", "type": "connect", "props":"naming=system;libraries=jesseg,qiws"}
+```
+
+Example SQL query:
+```json
+{"id": "1l", "type": "sql", "rows":4, "sql":"select * from qiws.qcustcddt"}
+```
+
+Example to fetch more data (4 more rows) from previous query
+```json
+{"id": "2l", "type": "sqlmore", "cont_id":"1l", "rows":4}
+```
+
+## Options for customizing behavior
+
+Operation `sql` supports the following Java system properties:
+- `codeserver.jdbc.autoconnect`: Enable SQL to be run without first issuing a `connect` request (uses default values)
+- `codeserver.verbose`: verbose mode
+
+So, for instance:
+
+```bash
+/QOpenSys/QIBM/ProdData/JavaVM/jdk80/64bit/bin/java -Dcodeserver.jdbc.autoconnect=true -jar codeforibmiserver.jar
+```
