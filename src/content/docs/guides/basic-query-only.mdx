@@ -1,0 +1,245 @@
+---
+title: Basic Query Only Mode
+description: Restrict Mapepire connections to simple queries
+sidebar:
+    order: 1.5
+---
+
+import { Aside, Card, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+**Basic Query Only** mode restricts a Mapepire connection to simple queries. A connection in this mode can read data with
+`SELECT`, but it can't change data, change database objects, call procedures, or run CL commands.
+
+Use it when a user, application, or network location only needs to read data, for example:
+
+<CardGrid>
+	<Card title="Reporting and analytics" icon="list-format">
+		Dashboards, BI tools, and report writers that should only ever read data.
+	</Card>
+	<Card title="Untrusted networks" icon="warning">
+		Give connections from outside your internal network read-only access, even for users with broad authority.
+	</Card>
+	<Card title="Least privilege" icon="approve-check-circle">
+		Limit what a stolen password can do. A basic-only connection can't change data, even if the user profile has authority to.
+	</Card>
+	<Card title="Exploration and AI tools" icon="magnifier">
+		Let ad hoc query tools and generated SQL explore the database without risk of changes.
+	</Card>
+</CardGrid>
+
+<Aside type="note">
+Basic Query Only mode is available in `mapepire-server` v2.5.0 and later.
+</Aside>
+
+## What counts as a basic query
+
+A **basic query** is a single query statement that only *reads* schemas, tables, views, columns, and variables, and only uses
+allowed built-in functions.
+
+<CardGrid>
+	<Card title="Allowed" icon="approve-check">
+		- `SELECT` statements that read tables and views, including catalog views such as `QSYS2.SYSTABLES`
+		- Joins, subqueries, common table expressions, `GROUP BY`, `ORDER BY`, and similar clauses
+		- Unqualified built-in functions, such as `UPPER`, `SUBSTR`, `COUNT`, `JSON_OBJECT`, and `VARCHAR_FORMAT`
+		- Preparing and running a basic query with parameter markers
+	</Card>
+	<Card title="Rejected" icon="error">
+		- Data changes: `INSERT`, `UPDATE`, `DELETE`, `MERGE`
+		- Object changes: `CREATE`, `ALTER`, `DROP`, `GRANT`, and other DDL
+		- Procedure calls: `CALL`
+		- Schema-qualified functions, or your own UDFs
+		- Built-ins that act outside the database: `HTTP_*`, `MQSEND`, `MQRECEIVE*`
+		- CL commands and Visual Explain requests
+	</Card>
+</CardGrid>
+
+<Aside type="caution" title="Schema-qualified functions are always rejected">
+Mapepire can't tell whether a user-defined or IBM-supplied table function changes anything, so any schema-qualified function
+is rejected. IBM i services that are *views*, such
+as `QSYS2.USER_INFO`, are allowed.
+</Aside>
+
+## How to enable it
+
+A connection is restricted to basic queries if **any** of the following apply. Each can only make a connection more
+restricted, so a client or rule can't remove a restriction set elsewhere.
+
+<Tabs>
+<TabItem label="Per user or IP (rules file)">
+
+Add an `allowbasiconly` rule to the [connection rules file](/guides/sysadmin#connection-rules-via-configuration-file),
+`/QOpenSys/etc/mapepire/iprules.conf`. It uses the same format as `allow` and `deny`:
+
+```sh title="/QOpenSys/etc/mapepire/iprules.conf"
+allowbasiconly <username>@<ip-address>
+```
+
+This is the most flexible option. You can restrict specific users, specific networks, or both.
+
+</TabItem>
+<TabItem label="Whole server">
+
+Start the server with the `--basic-only` flag to restrict **every** connection, regardless of the rules file. The aliases
+`--basic-queries-only`, `--bqo`, and `-bqo` do the same thing.
+
+```sh
+nohup /QOpenSys/pkgs/bin/mapepire --basic-only &
+```
+
+If you use Service Commander, run `scedit mapepire` and add the flag to the end of the `start_cmd` value.
+
+</TabItem>
+<TabItem label="Client opt-in">
+
+A client can restrict its own connection by including `access=read only` in the JDBC properties it sends when connecting
+(the `props` field of the connect request).
+
+This is useful for read-only tools that want a guarantee they can't change anything, even when the user profile could.
+
+</TabItem>
+</Tabs>
+
+## How rules interact
+
+The rules file has three rule types:
+
+| Rule | Effect when it's the deciding rule |
+|---|---|
+| `allow` | The connection is allowed with full access. |
+| `allowbasiconly` | The connection is allowed, but restricted to basic queries. |
+| `deny` | The connection is refused. |
+
+For each connection, the server finds the deciding rule like this:
+
+<Steps>
+
+1. IBM-supplied user profiles, such as `QSECOFR` and `QSYS`, are always refused, whatever the rules say.
+
+2. The server checks every rule against the user profile and client IP address. The `*` wildcard can be used anywhere in
+   either part, and matching isn't case-sensitive.
+
+3. The **last** matching rule in the file decides. If no rule matches, the connection is allowed with full access.
+
+4. Finally, the connection is restricted to basic queries if the deciding rule is `allowbasiconly`, the server was started
+   with `--basic-only`, or the client asked for `access=read only`.
+
+</Steps>
+
+<Aside type="tip" title="Order matters">
+Because the last match wins, put broad rules first and more specific exceptions after them. An `allow` rule that comes
+*after* a matching `allowbasiconly` rule lifts the restriction for that connection.
+</Aside>
+
+<Aside type="caution" title="Restart after editing rules">
+The server reads the rules file once, when it starts. Restart the server after you change the file. For example, with Service Commander: `sc restart mapepire`.
+</Aside>
+
+## Examples
+
+### Read-only reporting user
+
+Everyone gets full access, except the `RPTUSER` profile used by the reporting tool, which can only run basic queries.
+
+```sh title="/QOpenSys/etc/mapepire/iprules.conf"
+# Full access for everyone by default
+allow *@*
+
+# The reporting tool's profile can only read data
+allowbasiconly rptuser@*
+```
+
+### Everyone basic-only, except admin and app users
+
+Basic Query Only is the default, and a few trusted profiles get full access.
+
+```sh title="/QOpenSys/etc/mapepire/iprules.conf"
+# Restrict everyone to basic queries by default
+allowbasiconly *@*
+
+# These profiles need full access
+allow dbadmin@*
+allow appusr1@*
+allow appusr2@*
+```
+
+### Basic-only from untrusted networks
+
+Connections from the internal network (`192.168.*`) get full access. Connections from anywhere else can only run basic queries.
+
+```sh title="/QOpenSys/etc/mapepire/iprules.conf"
+# Anywhere else: read-only
+allowbasiconly *@*
+
+# Internal network: full access
+allow *@192.168.*
+```
+
+### Combining with deny rules
+
+You can mix all three rule types. Here, `Q*` profiles are refused, the internal network gets full access, and the only
+external connections allowed are from `RPTUSER`, restricted to basic queries.
+
+```sh title="/QOpenSys/etc/mapepire/iprules.conf"
+# Refuse everything by default
+deny *@*
+
+# Internal network: full access
+allow *@192.168.*
+
+# The reporting user may also connect from outside, read-only
+allowbasiconly rptuser@*
+
+# Never allow profiles starting with Q, from anywhere
+deny q*@*
+```
+
+<Aside type="note">
+In this example, `RPTUSER` is restricted to basic queries even from the internal network, because the `allowbasiconly`
+rule comes after the `allow *@192.168.*` rule.
+</Aside>
+
+## What a client sees
+
+On a basic-only connection, a basic query runs normally:
+
+```sql
+-- ✅ Allowed
+SELECT CUSNUM, LSTNAM, UPPER(CITY) AS CITY
+  FROM QIWS.QCUSTCDT
+  WHERE STATE = 'NY'
+  ORDER BY LSTNAM
+```
+
+A statement that isn't a basic query is rejected before it runs:
+
+```sql
+-- ❌ Rejected
+UPDATE QIWS.QCUSTCDT SET CDTLMT = 5000 WHERE CUSNUM = 938472
+```
+
+The server replies with `success: false`, the error message `Only basic queries are allowed`, SQL state `42505`, and SQL code
+`-99999`:
+
+```json {3-6}
+{
+  "id": "query1",
+  "error": "Only basic queries are allowed",
+  "success": false,
+  "sql_state": "42505",
+  "sql_rc": -99999,
+  "execution_time": 12
+}
+```
+
+Each client library reports this as a failed request in its usual way, with the same message.
+
+<Aside type="note">
+Rejected CL commands and Visual Explain requests return the same error message, but without the `42505` SQL state.
+</Aside>
+
+## Related
+
+<CardGrid>
+	<LinkCard title="Server Install/Config" description="Set up the connection rules file and the other server settings." href="/guides/sysadmin#connection-rules-via-configuration-file" />
+	<LinkCard title="Clients" description="Find a client library for your language." href="/guides/clients" />
+</CardGrid>
