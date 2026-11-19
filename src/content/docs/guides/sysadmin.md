@@ -160,7 +160,8 @@ configuration file:
 
 The format for this configuration file is as follows:
 - Comment lines begin with a leading `#`
-- Rules are defined in the format `allow <username>@<ip-address>` `deny <username>@<ip-address>` 
+- Rules are defined in the format `allow <username>@<ip-address>`, `deny <username>@<ip-address>`, or `allowbasiconly <username>@<ip-address>`
+- `allowbasiconly` allows the connection but restricts it to read-only queries. See [Basic Query Only Mode](/guides/basic-query-only) for details and examples.
 - The `*` wildcard can be used at any place in the username or IP address
 - For any specific connection, the last matching rule takes precedence
 
